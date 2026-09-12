@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Markdown Leader</title>
+  <style>
+    body { width: 300px; margin: 0; padding: 18px; color: #20242c; background: #fff; font: 14px/1.55 "Segoe UI", sans-serif; }
+    h1 { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-size: 18px; }
+    p { margin: 8px 0; }
+    .status { padding: 10px; border-radius: 8px; background: #eff4ff; }
+    button { width: 100%; margin-top: 10px; border: 0; border-radius: 8px; padding: 9px 12px; color: #fff; background: #1765e3; cursor: pointer; font-weight: 600; }
+    button:focus-visible { outline: 2px solid #6c8ccb; outline-offset: 2px; }
+    small { display: block; margin-top: 10px; color: #667085; }
+  </style>
+</head>
+<body>
+  <h1><img src="assets/logo.svg" width="30" height="30" alt="">Markdown Leader</h1>
+  <p class="status" data-file-access data-i18n="popupCheckingFileAccess"></p>
+  <p data-i18n="popupDescription"></p>
+  <button type="button" data-open-reader data-i18n="popupOpenReader"></button>
+  <button type="button" data-open-settings data-i18n="popupOpenSettings"></button>
+  <small data-i18n="popupFileAccessHint"></small>
+  <small data-i18n="popupWriteHint"></small>
+  <script src="popup.js"></script>
+</body>
+</html>

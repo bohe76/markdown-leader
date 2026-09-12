@@ -1,0 +1,531 @@
+{
+  "readerSortA": { "message": "이름순 · A → Z" },
+  "readerSortZ": { "message": "이름순 · Z → A" },
+  "readerSortN": { "message": "수정일순 · 최근 먼저" },
+  "readerSortO": { "message": "수정일순 · 오래된 먼저" },
+  "readerMarkdownFilesOnly": { "message": "Markdown 문서만 표시" },
+  "extensionDescription": {
+    "message": "로컬 Markdown을 탐색·검색하고 A4로 미리 보세요. PDF 저장과 원본 체크박스·메모 검토를 지원합니다."
+  },
+  "unknownError": {
+    "message": "알 수 없는 오류"
+  },
+  "errorFileUrlOnly": {
+    "message": "로컬 파일 URL만 읽을 수 있습니다."
+  },
+  "errorReadTimeout": {
+    "message": "파일 읽기 시간 초과 ($SECONDS$초)",
+    "placeholders": {
+      "seconds": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorRequestDenied": {
+    "message": "허용되지 않은 요청입니다."
+  },
+  "errorStorageUnavailable": {
+    "message": "확장 프로그램 저장소를 사용할 수 없습니다. 문서 탭을 F5로 새로고침하세요."
+  },
+  "errorConnectionInvalidated": {
+    "message": "확장 프로그램 연결이 끊겼습니다. 문서 탭을 F5로 새로고침하세요. ($DETAIL$)",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorMessageChannelClosed": {
+    "message": "확장 프로그램의 응답 연결이 종료됐습니다. 반복되면 문서 탭을 F5로 새로고침하세요. ($DETAIL$)",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorReadTimeoutAdvice": {
+    "message": "파일 읽기 시간이 초과됐습니다. 저장 작업이나 드라이브 상태를 확인하세요. ($DETAIL$)",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorFileReadAdvice": {
+    "message": "파일을 읽지 못했습니다. 파일 이동·삭제, 드라이브 연결, 확장 프로그램의 파일 URL 접근 허용을 확인하세요. ($DETAIL$)",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupCheckingFileAccess": {
+    "message": "파일 URL 권한을 확인하는 중입니다…"
+  },
+  "popupDescription": {
+    "message": "리더에서 Markdown 파일·폴더를 열거나 로컬 파일을 Chrome으로 드래그하세요."
+  },
+  "popupOpenSettings": {
+    "message": "확장 프로그램 설정 열기"
+  },
+  "popupFileAccessHint": {
+    "message": "설정에서 ‘파일 URL에 대한 액세스 허용’을 켜 주세요."
+  },
+  "popupFileAccessAllowed": {
+    "message": "파일 URL 접근이 허용되어 있습니다."
+  },
+  "popupFileAccessDenied": {
+    "message": "파일 URL 접근이 꺼져 있습니다. 아래 설정에서 허용해 주세요."
+  },
+  "shortcutToggleRefresh": {
+    "message": "자동 새로고침 켜기/끄기"
+  },
+  "shortcutToggleTheme": {
+    "message": "밝은 테마와 어두운 테마 전환"
+  },
+  "readerFiles": {
+    "message": "파일 탐색기"
+  },
+  "readerOutline": {
+    "message": "목차"
+  },
+  "readerSettings": {
+    "message": "설정"
+  },
+  "readerDocumentSearch": {
+    "message": "문서 검색"
+  },
+  "readerSearch": {
+    "message": "검색"
+  },
+  "readerSearchPlaceholder": {
+    "message": "문서에서 찾기"
+  },
+  "readerPreviousSearchResult": {
+    "message": "이전 검색 결과"
+  },
+  "readerNextSearchResult": {
+    "message": "다음 검색 결과"
+  },
+  "readerClearSearch": {
+    "message": "검색 지우기"
+  },
+  "readerReadingSettings": {
+    "message": "읽기 설정"
+  },
+  "readerAutomaticRefresh": {
+    "message": "자동 새로고침"
+  },
+  "readerRefreshInterval": {
+    "message": "새로고침 주기"
+  },
+  "readerSecondsUnit": {
+    "message": "초"
+  },
+  "readerTheme": {
+    "message": "테마"
+  },
+  "readerThemeLight": {
+    "message": "밝게"
+  },
+  "readerThemeDark": {
+    "message": "어둡게"
+  },
+  "readerThemeSystem": {
+    "message": "시스템"
+  },
+  "readerFont": {
+    "message": "글꼴"
+  },
+  "readerSystemFont": {
+    "message": "시스템 글꼴"
+  },
+  "readerFontSize": {
+    "message": "글자 크기"
+  },
+  "readerReadingWidth": {
+    "message": "읽기 폭"
+  },
+  "readerReadingWidthMode": {
+    "message": "읽기 폭 방식"
+  },
+  "readerCustomWidth": {
+    "message": "자유 폭"
+  },
+  "readerA4Width": {
+    "message": "A4 페이지"
+  },
+  "readerA4PreviewNote": {
+    "message": "A4 페이지 · 여백 20mm · 리본의 PDF 버튼으로 같은 배치를 출력할 수 있습니다."
+  },
+  "readerKeyboardShortcuts": {
+    "message": "키보드 단축키"
+  },
+  "readerRefresh": {
+    "message": "새로고침"
+  },
+  "readerSearchMatchTitle": {
+    "message": "검색어가 포함된 문서 또는 폴더"
+  },
+  "readerSearchingFolderDocuments": {
+    "message": "폴더 내 문서 검색 중…"
+  },
+  "readerSearchDocumentFailed": {
+    "message": "폴더 내 문서 검색 실패"
+  },
+  "readerSearchFolderReadFailed": {
+    "message": "검색 폴더 읽기 실패"
+  },
+  "readerSearchSummary": {
+    "message": "$MATCHED$개 문서 일치 · $CHECKED$개 확인$FAILURES$$LIMITED$$STOPPED$",
+    "placeholders": {
+      "matched": { "content": "$1" },
+      "checked": { "content": "$2" },
+      "failures": { "content": "$3" },
+      "limited": { "content": "$4" },
+      "stopped": { "content": "$5" }
+    }
+  },
+  "readerSearchFailures": {
+    "message": " · $COUNT$개 읽기 실패",
+    "placeholders": {
+      "count": { "content": "$1" }
+    }
+  },
+  "readerSearchLimitReached": {
+    "message": " · 검색 한도 도달(일부 결과)"
+  },
+  "readerSearchStopped": {
+    "message": " · 검색 중단(F5 필요)"
+  },
+  "readerExtensionContextChanged": {
+    "message": "확장 프로그램 연결이 변경되었습니다. 문서 탭을 F5로 새로고침하세요."
+  },
+  "readerExtensionContextChangedLog": {
+    "message": "확장 연결 변경 · 자동 갱신 중지 ($DETAIL$)",
+    "placeholders": {
+      "detail": { "content": "$1" }
+    }
+  },
+  "readerLogUrl": {
+    "message": "URL"
+  },
+  "readerLogError": {
+    "message": "오류"
+  },
+  "readerErrorStatus": {
+    "message": "$CONTEXT$: $DETAIL$$RETRY$",
+    "placeholders": {
+      "context": { "content": "$1" },
+      "detail": { "content": "$2" },
+      "retry": { "content": "$3" }
+    }
+  },
+  "readerRetryNextCycle": {
+    "message": " · 다음 주기에 다시 시도합니다."
+  },
+  "readerFileReadFailed": {
+    "message": "파일을 읽지 못했습니다."
+  },
+  "readerCopy": {
+    "message": "복사"
+  },
+  "readerCopied": {
+    "message": "복사됨"
+  },
+  "readerFolderReadFailed": {
+    "message": "폴더를 읽지 못했습니다."
+  },
+  "readerFolderRefreshFailed": {
+    "message": "폴더 갱신 실패"
+  },
+  "readerDocumentReadFailed": {
+    "message": "문서 읽기 실패"
+  },
+  "readerOpeningDocument": {
+    "message": "문서를 여는 중…"
+  },
+  "readerDocumentDisplayFailed": {
+    "message": "문서 표시 실패"
+  },
+  "readerAutomaticRefreshReadFailed": {
+    "message": "자동 새로고침 중 문서 읽기 실패"
+  },
+  "readerAutomaticRefreshDisplayFailed": {
+    "message": "자동 새로고침 중 문서 표시 실패"
+  },
+  "readerRefreshedAt": {
+    "message": "갱신됨 $TIME$",
+    "placeholders": {
+      "time": { "content": "$1" }
+    }
+  },
+  "readerSettingSaveFailed": {
+    "message": "설정 저장 실패 · 현재 탭에만 적용"
+  },
+  "readerFolderLocalFilesOnly": {
+    "message": "로컬 파일에서만 폴더를 표시합니다."
+  },
+  "readerLocalFile": {
+    "message": "로컬 파일"
+  },
+  "readerInitializationFailedLog": {
+    "message": "뷰어 초기화 실패"
+  },
+  "readerInitializationFailed": {
+    "message": "Markdown Leader 초기화 실패: $DETAIL$",
+    "placeholders": {
+      "detail": { "content": "$1" }
+    }
+  },
+  "alertNote": { "message": "참고" },
+  "alertTip": { "message": "팁" },
+  "alertImportant": { "message": "중요" },
+  "alertWarning": { "message": "경고" },
+  "alertCaution": { "message": "주의" },
+  "footnoteReturn": { "message": "본문으로 돌아가기" },
+  "mathRenderFailed": { "message": "수식을 표시하지 못했습니다. 원문을 확인하세요." },
+  "diagramSource": { "message": "다이어그램 원문" },
+  "diagramUnavailable": { "message": "다이어그램을 표시하지 못했습니다. 원문을 확인하세요." },
+  "readerOpenFolder": {
+    "message": "폴더 열기"
+  },
+  "readerOpenFile": {
+    "message": "파일 열기"
+  },
+  "readerWelcomeTitle": {
+    "message": "Markdown 문서를 열어보세요"
+  },
+  "readerWelcomeHint": {
+    "message": "파일을 이곳으로 끌어다 놓거나 아래 버튼으로 선택하세요."
+  },
+  "readerFolderHint": {
+    "message": "폴더를 열면 Markdown 문서만 표시합니다."
+  },
+  "readerChooseDocument": {
+    "message": "왼쪽에서 문서를 선택하세요."
+  },
+  "readerFolderSearch": {
+    "message": "폴더에서 찾기"
+  },
+  "readerCloseSearch": {
+    "message": "찾기 닫기"
+  },
+  "readerChooseFailed": {
+    "message": "파일 또는 폴더를 열지 못했습니다"
+  },
+  "readerMarkdownOnly": {
+    "message": "Markdown 파일을 선택하세요."
+  },
+  "readerSingleFileHint": {
+    "message": "이미지나 다른 문서를 함께 읽으려면 해당 폴더를 열어주세요."
+  },
+  "readerDropFiles": {
+    "message": "여기에 놓아 열기"
+  },
+  "popupOpenReader": {
+    "message": "리더 열기"
+  },
+  "readerDocumentTabs": {
+    "message": "문서 탭"
+  },
+  "readerCloseTab": {
+    "message": "$NAME$ 닫기",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "readerPreviousTabs": {
+    "message": "이전 탭 보기"
+  },
+  "readerNextTabs": {
+    "message": "다음 탭 보기"
+  },
+  "readerOpenDocuments": {
+    "message": "열린 문서"
+  },
+  "readerDocumentNumber": {
+    "message": "문서 $NUMBER$",
+    "placeholders": {
+      "number": {
+        "content": "$1"
+      }
+    }
+  },
+  "readerRecent": {
+    "message": "최근 항목"
+  },
+  "readerFavorites": {
+    "message": "즐겨찾기"
+  },
+  "readerRecentEmpty": {
+    "message": "최근에 연 파일이나 폴더가 없습니다."
+  },
+  "readerFavoritesEmpty": {
+    "message": "탭의 별을 눌러 즐겨찾기를 추가하세요."
+  },
+  "readerCollapsePanel": {
+    "message": "왼쪽 패널 접기"
+  },
+  "readerExpandPanel": {
+    "message": "왼쪽 패널 펼치기"
+  },
+  "readerPinnedCloseTitle": {
+    "message": "고정한 탭을 닫을까요?"
+  },
+  "readerClose": {
+    "message": "닫기"
+  },
+  "readerReconnectTitle": {
+    "message": "파일 또는 폴더를 다시 연결하세요."
+  },
+  "readerReconnectDetails": {
+    "message": "이 항목에 접근하려면 원래 파일 또는 폴더를 다시 선택하세요."
+  },
+  "readerSelectFile": {
+    "message": "파일 선택"
+  },
+  "readerSelectFolder": {
+    "message": "폴더 선택"
+  },
+  "readerReviewChooseTitle": {
+    "message": "수정할 원본 파일을 선택하세요."
+  },
+  "readerReviewChooseMessage": {
+    "message": "이 문서의 체크박스와 메모를 저장하려면 아래 원본 파일을 선택하세요."
+  },
+  "readerReviewConflict": {
+    "message": "원본이 다른 곳에서 변경됐습니다. 문서를 다시 읽고 시도하세요."
+  },
+  "readerReviewStale": {
+    "message": "문서가 변경되어 저장을 취소했습니다."
+  },
+  "readerReviewInvalid": {
+    "message": "메모 또는 체크박스의 원본 형식을 확인할 수 없습니다. 원본은 변경하지 않았습니다."
+  },
+  "readerReviewPermission": {
+    "message": "원본 파일의 쓰기 권한이 필요합니다."
+  },
+  "readerReviewBusy": {
+    "message": "저장 중입니다. 잠시 후 다시 시도하세요."
+  },
+  "readerReviewSaveFailed": {
+    "message": "원본 저장 실패"
+  },
+  "readerLibraryFailed": {
+    "message": "목록 저장 또는 열기 실패"
+  },
+  "readerWrongFile": {
+    "message": "선택한 파일 또는 폴더가 요청한 항목과 다릅니다."
+  },
+  "reviewTitle": {
+    "message": "메모"
+  },
+  "reviewAdd": {
+    "message": "메모 추가"
+  },
+  "reviewClose": {
+    "message": "메모 닫기"
+  },
+  "reviewEmpty": {
+    "message": "이 문서에 메모가 없습니다."
+  },
+  "reviewSelectHint": {
+    "message": "본문을 선택한 뒤 메모 추가를 누르세요."
+  },
+  "reviewSave": {
+    "message": "저장"
+  },
+  "reviewCancel": {
+    "message": "취소"
+  },
+  "reviewEdit": {
+    "message": "수정"
+  },
+  "reviewDelete": {
+    "message": "삭제"
+  },
+  "reviewLocate": {
+    "message": "본문 위치 보기"
+  },
+  "reviewUnlocated": {
+    "message": "대상 문구를 찾을 수 없음"
+  },
+  "reviewTextLabel": {
+    "message": "메모 내용"
+  },
+  "reviewSaving": {
+    "message": "저장 중…"
+  },
+  "reviewSaveFailed": {
+    "message": "메모를 저장하지 못했습니다."
+  },
+  "readerPinTab": {
+    "message": "탭 고정: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "readerUnpinTab": {
+    "message": "탭 고정 해제: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "readerFavoriteTab": {
+    "message": "즐겨찾기 추가: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "readerUnfavoriteTab": {
+    "message": "즐겨찾기 해제: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "reviewNoteChanged": {"message": "이 메모가 다른 곳에서 변경되거나 삭제됐습니다. 현재 메모를 확인한 뒤 다시 수정하세요."},
+  "popupWriteHint": {"message": "읽기만 하면 파일은 바뀌지 않습니다. 쓰기 권한 허용 후 체크박스 변경과 메모 저장·삭제는 원본 파일에 반영됩니다."},
+  "reviewOriginalHint": {"message": "메모 저장·삭제는 원본 Markdown 파일을 수정합니다. 메모와 인용문은 문서 끝의 주석에 저장되어 파일과 함께 전달됩니다."},
+  "toastDismiss": {"message": "알림 닫기"},
+  "readerConnectionTitle": {"message": "파일·폴더 연결을 확인하세요"},
+  "readerConnectionDetails": {"message": "파일이나 폴더가 이동·삭제되었거나 접근 권한이 변경되었을 수 있습니다."},
+  "readerConnectionMissing": {"message": "파일을 찾을 수 없습니다. 다시 연결하세요."},
+  "readerConnectionMissingRefresh": {"message": "파일을 찾을 수 없어 자동 새로고침을 중지했습니다. 마지막으로 읽은 내용을 유지합니다."},
+  "readerConnectionPermission": {"message": "파일 접근 권한이 없습니다. 다시 연결하세요."},
+  "readerConnectionPermissionRefresh": {"message": "파일 접근 권한이 없어 자동 새로고침을 중지했습니다. 마지막으로 읽은 내용을 유지합니다."},
+  "readerFileUrlAccess": {"message": "파일 URL 접근이 차단되었습니다. Chrome 확장 프로그램 설정에서 접근을 허용한 뒤 다시 연결하세요."},
+  "readerFileUrlAccessRefresh": {"message": "파일 URL 접근이 차단되어 자동 새로고침을 중지했습니다. Chrome 확장 프로그램 설정에서 접근을 허용한 뒤 다시 연결하세요."},
+  "readerConnectionUnavailable": {"message": "파일을 읽을 수 없습니다. 다시 연결하세요."},
+  "readerConnectionUnavailableRefresh": {"message": "파일을 읽을 수 없어 자동 새로고침을 중지했습니다. 마지막으로 읽은 내용을 유지합니다."},
+  "readerConnectionTemporary": {"message": "파일을 지금 읽을 수 없습니다. 잠시 후 다시 시도하세요."},
+  "readerConnectionTemporaryRefresh": {"message": "파일을 지금 읽을 수 없습니다. 마지막으로 읽은 내용을 유지하며 다음 자동 새로고침에서 다시 시도합니다."},
+  "readerReconnectAction": {"message": "다시 연결"},
+  "reviewDraftReconnected": {"message": "파일 연결이 바뀌어 메모 저장을 중단했습니다. 작성 내용은 남아 있습니다. 내용을 복사한 뒤 취소하고 새 메모로 작성하세요."},
+  "readerRemoveFromList": {"message": "목록에서 제거"},
+  "readerRemoveFavoriteDetails": {"message": "제거하면 즐겨찾기에서만 제외됩니다. 실제 파일과 열린 탭은 유지됩니다."},
+  "readerRemoveRecentDetails": {"message": "제거하면 최근 항목에서만 제외됩니다. 실제 파일과 열린 탭은 유지됩니다."},
+  "readerConnectionCheck": {"message": "파일 연결 확인"},
+  "readerReconnectDuplicate": {"message": "선택한 파일은 다른 탭에서 열려 있습니다. 해당 탭을 닫은 뒤 다시 연결하세요."},
+  "readerReconnectFailed": {"message": "다시 연결하지 못했습니다. 기존 연결은 유지됩니다."},
+  "readerReconnectRestoreFailed": {"message": "다시 연결과 이전 연결 복원을 완료하지 못했습니다. 목록을 확인한 뒤 다시 시도하세요."},
+  "pdfPreview": {"message": "PDF · A4 미리보기"},
+  "pdfSave": {"message": "PDF로 저장"},
+  "pdfSettingsHint": {"message": "인쇄 대상은 **PDF로 저장**, 용지는 **A4**, 배율은 **100%**, 여백은 **없음**으로 선택하세요. 배경 그래픽은 **켬**, 머리글·바닥글은 **끔**으로 설정하면 미리보기와 같게 출력됩니다."},
+  "pdfPreparing": {"message": "A4 페이지를 준비하는 중…"},
+  "pdfPageCount": {"message": "A4 · $COUNT$페이지", "placeholders": {"count": {"content": "$1"}}},
+  "pdfResourceFailed": {"message": "출력에 필요한 이미지나 글꼴을 불러오지 못했습니다. 원본 문서의 리소스를 확인한 뒤 다시 시도하세요."},
+  "pdfLayoutFailed": {"message": "일부 내용을 A4 페이지에 배치하지 못했습니다. 너무 큰 표의 행이나 다이어그램을 확인하세요."},
+  "pdfDocumentNotReady": {"message": "문서를 연 뒤 PDF 출력을 시작하세요."},
+  "pdfDocumentChanged": {"message": "준비 중 문서가 변경됐습니다. 현재 문서에서 PDF 출력을 다시 시작하세요."}
+}

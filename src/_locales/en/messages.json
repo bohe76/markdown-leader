@@ -1,0 +1,531 @@
+{
+  "readerSortA": { "message": "Name · A to Z" },
+  "readerSortZ": { "message": "Name · Z to A" },
+  "readerSortN": { "message": "Modified · Newest first" },
+  "readerSortO": { "message": "Modified · Oldest first" },
+  "readerMarkdownFilesOnly": { "message": "Markdown documents only" },
+  "extensionDescription": {
+    "message": "Browse and search local Markdown, preview A4 pages, save PDFs, and review checklists and notes in the original files."
+  },
+  "unknownError": {
+    "message": "Unknown error"
+  },
+  "errorFileUrlOnly": {
+    "message": "Only local file URLs can be read."
+  },
+  "errorReadTimeout": {
+    "message": "File read timeout ($SECONDS$s)",
+    "placeholders": {
+      "seconds": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorRequestDenied": {
+    "message": "This request is not allowed."
+  },
+  "errorStorageUnavailable": {
+    "message": "Extension storage is unavailable. Refresh this document with F5."
+  },
+  "errorConnectionInvalidated": {
+    "message": "The extension connection is no longer valid. Refresh this document with F5. ($DETAIL$)",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorMessageChannelClosed": {
+    "message": "The extension response connection closed. If this repeats, refresh this document with F5. ($DETAIL$)",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorReadTimeoutAdvice": {
+    "message": "Reading the file timed out. Check whether it is being saved and whether the drive is available. ($DETAIL$)",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorFileReadAdvice": {
+    "message": "Could not read the file. Check whether it was moved or deleted, whether the drive is connected, and whether file URL access is allowed. ($DETAIL$)",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupCheckingFileAccess": {
+    "message": "Checking file URL access…"
+  },
+  "popupDescription": {
+    "message": "Open Markdown files or folders in the reader, or drag a local file into Chrome."
+  },
+  "popupOpenSettings": {
+    "message": "Open extension settings"
+  },
+  "popupFileAccessHint": {
+    "message": "Enable “Allow access to file URLs” in the extension settings."
+  },
+  "popupFileAccessAllowed": {
+    "message": "File URL access is allowed."
+  },
+  "popupFileAccessDenied": {
+    "message": "File URL access is off. Enable it in the settings below."
+  },
+  "shortcutToggleRefresh": {
+    "message": "Toggle automatic refresh"
+  },
+  "shortcutToggleTheme": {
+    "message": "Switch light/dark theme"
+  },
+  "readerFiles": {
+    "message": "File explorer"
+  },
+  "readerOutline": {
+    "message": "Outline"
+  },
+  "readerSettings": {
+    "message": "Settings"
+  },
+  "readerDocumentSearch": {
+    "message": "Document search"
+  },
+  "readerSearch": {
+    "message": "Search"
+  },
+  "readerSearchPlaceholder": {
+    "message": "Find in document"
+  },
+  "readerPreviousSearchResult": {
+    "message": "Previous search result"
+  },
+  "readerNextSearchResult": {
+    "message": "Next search result"
+  },
+  "readerClearSearch": {
+    "message": "Clear search"
+  },
+  "readerReadingSettings": {
+    "message": "Reading settings"
+  },
+  "readerAutomaticRefresh": {
+    "message": "Automatic refresh"
+  },
+  "readerRefreshInterval": {
+    "message": "Refresh interval"
+  },
+  "readerSecondsUnit": {
+    "message": "s"
+  },
+  "readerTheme": {
+    "message": "Theme"
+  },
+  "readerThemeLight": {
+    "message": "Light"
+  },
+  "readerThemeDark": {
+    "message": "Dark"
+  },
+  "readerThemeSystem": {
+    "message": "System"
+  },
+  "readerFont": {
+    "message": "Font"
+  },
+  "readerSystemFont": {
+    "message": "System font"
+  },
+  "readerFontSize": {
+    "message": "Font size"
+  },
+  "readerReadingWidth": {
+    "message": "Reading width"
+  },
+  "readerReadingWidthMode": {
+    "message": "Reading width mode"
+  },
+  "readerCustomWidth": {
+    "message": "Custom width"
+  },
+  "readerA4Width": {
+    "message": "A4 pages"
+  },
+  "readerA4PreviewNote": {
+    "message": "A4 pages · 20 mm margins · Use the PDF button in the ribbon to print this layout."
+  },
+  "readerKeyboardShortcuts": {
+    "message": "Keyboard shortcuts"
+  },
+  "readerRefresh": {
+    "message": "Refresh"
+  },
+  "readerSearchMatchTitle": {
+    "message": "Document or folder containing the search term"
+  },
+  "readerSearchingFolderDocuments": {
+    "message": "Searching documents in folder…"
+  },
+  "readerSearchDocumentFailed": {
+    "message": "Folder document search failed"
+  },
+  "readerSearchFolderReadFailed": {
+    "message": "Could not read search folder"
+  },
+  "readerSearchSummary": {
+    "message": "$MATCHED$ documents matched · $CHECKED$ checked$FAILURES$$LIMITED$$STOPPED$",
+    "placeholders": {
+      "matched": { "content": "$1" },
+      "checked": { "content": "$2" },
+      "failures": { "content": "$3" },
+      "limited": { "content": "$4" },
+      "stopped": { "content": "$5" }
+    }
+  },
+  "readerSearchFailures": {
+    "message": " · $COUNT$ failed to read",
+    "placeholders": {
+      "count": { "content": "$1" }
+    }
+  },
+  "readerSearchLimitReached": {
+    "message": " · Search limit reached (partial results)"
+  },
+  "readerSearchStopped": {
+    "message": " · Search stopped (F5 required)"
+  },
+  "readerExtensionContextChanged": {
+    "message": "The extension connection changed. Refresh this document tab with F5."
+  },
+  "readerExtensionContextChangedLog": {
+    "message": "Extension connection changed · automatic refresh stopped ($DETAIL$)",
+    "placeholders": {
+      "detail": { "content": "$1" }
+    }
+  },
+  "readerLogUrl": {
+    "message": "URL"
+  },
+  "readerLogError": {
+    "message": "Error"
+  },
+  "readerErrorStatus": {
+    "message": "$CONTEXT$: $DETAIL$$RETRY$",
+    "placeholders": {
+      "context": { "content": "$1" },
+      "detail": { "content": "$2" },
+      "retry": { "content": "$3" }
+    }
+  },
+  "readerRetryNextCycle": {
+    "message": " · Will retry on the next cycle."
+  },
+  "readerFileReadFailed": {
+    "message": "Could not read the file."
+  },
+  "readerCopy": {
+    "message": "Copy"
+  },
+  "readerCopied": {
+    "message": "Copied"
+  },
+  "readerFolderReadFailed": {
+    "message": "Could not read this folder."
+  },
+  "readerFolderRefreshFailed": {
+    "message": "Folder refresh failed"
+  },
+  "readerDocumentReadFailed": {
+    "message": "Document read failed"
+  },
+  "readerOpeningDocument": {
+    "message": "Opening document…"
+  },
+  "readerDocumentDisplayFailed": {
+    "message": "Document display failed"
+  },
+  "readerAutomaticRefreshReadFailed": {
+    "message": "Document read failed during automatic refresh"
+  },
+  "readerAutomaticRefreshDisplayFailed": {
+    "message": "Document display failed during automatic refresh"
+  },
+  "readerRefreshedAt": {
+    "message": "Refreshed $TIME$",
+    "placeholders": {
+      "time": { "content": "$1" }
+    }
+  },
+  "readerSettingSaveFailed": {
+    "message": "Could not save setting · Applied to this tab only"
+  },
+  "readerFolderLocalFilesOnly": {
+    "message": "Folders are shown for local files only."
+  },
+  "readerLocalFile": {
+    "message": "Local file"
+  },
+  "readerInitializationFailedLog": {
+    "message": "Viewer initialization failed"
+  },
+  "readerInitializationFailed": {
+    "message": "Markdown Leader initialization failed: $DETAIL$",
+    "placeholders": {
+      "detail": { "content": "$1" }
+    }
+  },
+  "alertNote": { "message": "Note" },
+  "alertTip": { "message": "Tip" },
+  "alertImportant": { "message": "Important" },
+  "alertWarning": { "message": "Warning" },
+  "alertCaution": { "message": "Caution" },
+  "footnoteReturn": { "message": "Back to text" },
+  "mathRenderFailed": { "message": "Could not display this formula. Check the source." },
+  "diagramSource": { "message": "Diagram source" },
+  "diagramUnavailable": { "message": "Could not display this diagram. Check the source." },
+  "readerOpenFolder": {
+    "message": "Open folder"
+  },
+  "readerOpenFile": {
+    "message": "Open file"
+  },
+  "readerWelcomeTitle": {
+    "message": "Open a Markdown document"
+  },
+  "readerWelcomeHint": {
+    "message": "Drop a file here or choose one below."
+  },
+  "readerFolderHint": {
+    "message": "Only Markdown documents are listed in folders."
+  },
+  "readerChooseDocument": {
+    "message": "Select a document on the left."
+  },
+  "readerFolderSearch": {
+    "message": "Find in folder"
+  },
+  "readerCloseSearch": {
+    "message": "Close search"
+  },
+  "readerChooseFailed": {
+    "message": "Could not open the file or folder"
+  },
+  "readerMarkdownOnly": {
+    "message": "Choose a Markdown file."
+  },
+  "readerSingleFileHint": {
+    "message": "Open its folder to access images and other documents."
+  },
+  "readerDropFiles": {
+    "message": "Drop here to open"
+  },
+  "popupOpenReader": {
+    "message": "Open reader"
+  },
+  "readerDocumentTabs": {
+    "message": "Document tabs"
+  },
+  "readerCloseTab": {
+    "message": "Close $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "readerPreviousTabs": {
+    "message": "Show previous tabs"
+  },
+  "readerNextTabs": {
+    "message": "Show next tabs"
+  },
+  "readerOpenDocuments": {
+    "message": "Open documents"
+  },
+  "readerDocumentNumber": {
+    "message": "Document $NUMBER$",
+    "placeholders": {
+      "number": {
+        "content": "$1"
+      }
+    }
+  },
+  "readerRecent": {
+    "message": "Recent"
+  },
+  "readerFavorites": {
+    "message": "Favorites"
+  },
+  "readerRecentEmpty": {
+    "message": "No recently opened files or folders."
+  },
+  "readerFavoritesEmpty": {
+    "message": "Select the star on a tab to add a favorite."
+  },
+  "readerCollapsePanel": {
+    "message": "Collapse left panel"
+  },
+  "readerExpandPanel": {
+    "message": "Expand left panel"
+  },
+  "readerPinnedCloseTitle": {
+    "message": "Close this pinned tab?"
+  },
+  "readerClose": {
+    "message": "Close"
+  },
+  "readerReconnectTitle": {
+    "message": "Reconnect this file or folder."
+  },
+  "readerReconnectDetails": {
+    "message": "Select the original file or folder to access this item."
+  },
+  "readerSelectFile": {
+    "message": "Select file"
+  },
+  "readerSelectFolder": {
+    "message": "Select folder"
+  },
+  "readerReviewChooseTitle": {
+    "message": "Select the original file to update."
+  },
+  "readerReviewChooseMessage": {
+    "message": "Select the original file below to save its checkboxes and notes."
+  },
+  "readerReviewConflict": {
+    "message": "The original file changed elsewhere. Reload the document and try again."
+  },
+  "readerReviewStale": {
+    "message": "Saving was cancelled because the document changed."
+  },
+  "readerReviewInvalid": {
+    "message": "The source format of the notes or checkbox could not be verified. The original was not changed."
+  },
+  "readerReviewPermission": {
+    "message": "Write permission for the original file is required."
+  },
+  "readerReviewBusy": {
+    "message": "Saving is in progress. Try again shortly."
+  },
+  "readerReviewSaveFailed": {
+    "message": "Could not save the original file"
+  },
+  "readerLibraryFailed": {
+    "message": "Could not save or open the list item"
+  },
+  "readerWrongFile": {
+    "message": "The selected file or folder does not match the requested item."
+  },
+  "reviewTitle": {
+    "message": "Notes"
+  },
+  "reviewAdd": {
+    "message": "Add note"
+  },
+  "reviewClose": {
+    "message": "Close notes"
+  },
+  "reviewEmpty": {
+    "message": "There are no notes in this document."
+  },
+  "reviewSelectHint": {
+    "message": "Select text in the document, then select Add note."
+  },
+  "reviewSave": {
+    "message": "Save"
+  },
+  "reviewCancel": {
+    "message": "Cancel"
+  },
+  "reviewEdit": {
+    "message": "Edit"
+  },
+  "reviewDelete": {
+    "message": "Delete"
+  },
+  "reviewLocate": {
+    "message": "Show in document"
+  },
+  "reviewUnlocated": {
+    "message": "Target text could not be found"
+  },
+  "reviewTextLabel": {
+    "message": "Note text"
+  },
+  "reviewSaving": {
+    "message": "Saving…"
+  },
+  "reviewSaveFailed": {
+    "message": "Could not save the note."
+  },
+  "readerPinTab": {
+    "message": "Pin tab: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "readerUnpinTab": {
+    "message": "Unpin tab: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "readerFavoriteTab": {
+    "message": "Add favorite: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "readerUnfavoriteTab": {
+    "message": "Remove favorite: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "reviewNoteChanged": {"message": "This note was changed or deleted elsewhere. Review the current note before editing again."},
+  "popupWriteHint": {"message": "Reading does not change files. Checklist changes and saved or deleted notes modify your original file after write access is allowed."},
+  "reviewOriginalHint": {"message": "Saving or deleting a note updates the original Markdown file. Notes and quoted text are stored in a comment at the end and travel with the file."},
+  "toastDismiss": {"message": "Dismiss notification"},
+  "readerConnectionTitle": {"message": "Check the file or folder connection"},
+  "readerConnectionDetails": {"message": "The file or folder may have been moved or deleted, or its access permission may have changed."},
+  "readerConnectionMissing": {"message": "The file could not be found. Reconnect it."},
+  "readerConnectionMissingRefresh": {"message": "Automatic refresh stopped because the file could not be found. The last-read content remains visible."},
+  "readerConnectionPermission": {"message": "File access was denied. Reconnect the file."},
+  "readerConnectionPermissionRefresh": {"message": "Automatic refresh stopped because file access was denied. The last-read content remains visible."},
+  "readerFileUrlAccess": {"message": "File URL access is blocked. Allow access in the Chrome extension settings, then reconnect the file."},
+  "readerFileUrlAccessRefresh": {"message": "Automatic refresh stopped because File URL access is blocked. Allow access in the Chrome extension settings, then reconnect the file."},
+  "readerConnectionUnavailable": {"message": "The file could not be read. Reconnect it."},
+  "readerConnectionUnavailableRefresh": {"message": "Automatic refresh stopped because the file could not be read. The last-read content remains visible."},
+  "readerConnectionTemporary": {"message": "The file cannot be read right now. Try again shortly."},
+  "readerConnectionTemporaryRefresh": {"message": "The file cannot be read right now. The last-read content remains visible, and automatic refresh will try again."},
+  "readerReconnectAction": {"message": "Reconnect"},
+  "reviewDraftReconnected": {"message": "Saving is blocked because the file connection changed. Your draft is kept. Copy the text, cancel this draft, and create a new note."},
+  "readerRemoveFromList": {"message": "Remove from list"},
+  "readerRemoveFavoriteDetails": {"message": "This removes only the favorite. The actual file and open tab are kept."},
+  "readerRemoveRecentDetails": {"message": "This removes only the recent entry. The actual file and open tab are kept."},
+  "readerConnectionCheck": {"message": "Check file connection"},
+  "readerReconnectDuplicate": {"message": "The selected file is open in another tab. Close that tab before reconnecting."},
+  "readerReconnectFailed": {"message": "Could not reconnect. The existing connection is kept."},
+  "readerReconnectRestoreFailed": {"message": "Could not finish reconnecting or restore the previous connection. Check the list and try again."},
+  "pdfPreview": {"message": "PDF · A4 preview"},
+  "pdfSave": {"message": "Save as PDF"},
+  "pdfSettingsHint": {"message": "Choose **Save as PDF**, **A4** paper, **100%** scale, and **None** for margins. Set background graphics to **On** and headers and footers to **Off** to match this preview."},
+  "pdfPreparing": {"message": "Preparing A4 pages…"},
+  "pdfPageCount": {"message": "A4 · $COUNT$ pages", "placeholders": {"count": {"content": "$1"}}},
+  "pdfResourceFailed": {"message": "An image or font could not be loaded for printing. Check the document resources and try again."},
+  "pdfLayoutFailed": {"message": "Some content could not fit on an A4 page. Check for oversized table rows or diagrams."},
+  "pdfDocumentNotReady": {"message": "Open a document before starting PDF output."},
+  "pdfDocumentChanged": {"message": "The document changed during preparation. Start PDF output again for the current document."}
+}

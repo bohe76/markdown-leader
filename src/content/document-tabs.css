@@ -1,0 +1,130 @@
+.ml-document-tabs {
+  position: fixed;
+  top: 24px;
+  height: 33px;
+  z-index: 11;
+  display: flex;
+  align-items: stretch;
+  color: var(--ml-muted);
+  background: var(--ml-bg);
+  box-shadow: inset 0 -1px 0 var(--ml-border);
+  font: 12px/1.4 var(--ml-font-family);
+}
+.ml-document-tabs::before {
+  content: "";
+  position: absolute;
+  top: -24px;
+  inset-inline: 0;
+  height: 24px;
+  background: var(--ml-bg);
+  pointer-events: none;
+}
+.ml-document-tabs[hidden], .ml-document-tabs button[hidden] { display: none; }
+.ml-document-tab-list {
+  position: relative;
+  display: flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-inline-start: -7px;
+  padding-inline: 7px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.ml-document-tab {
+  position: relative;
+  display: flex;
+  flex: 0 0 180px;
+  min-width: 180px;
+  max-width: 180px;
+  height: 33px;
+  border: 1px solid transparent;
+  border-bottom-color: var(--ml-border);
+  border-radius: 7px 7px 0 0;
+}
+.ml-document-tab.is-active {
+  color: var(--ml-text);
+  background: var(--ml-surface);
+  border-color: var(--ml-border);
+  border-bottom-color: var(--ml-surface);
+  font-weight: 600;
+}
+.ml-document-tab-select {
+  min-width: 0;
+  width: 100%;
+  padding: 0 66px 0 10px;
+  border: 0;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.ml-document-tab.has-connection-error .ml-document-tab-select { padding-left: 28px; }
+.ml-document-tab .ml-document-tab-warning { position: absolute; left: 6px; top: 6px; width: 18px; height: 20px; color: var(--ml-text); opacity: 1; }
+.ml-document-tab-tool {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+  width: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ml-muted);
+  background: transparent;
+  cursor: pointer;
+}
+.ml-document-tab-tool svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.ml-document-tab-tool:hover, .ml-document-tab:not(.is-active):hover { background: var(--ml-hover); }
+.ml-document-tab-tool:disabled { opacity: .4; cursor: default; }
+.ml-document-tab-close, .ml-document-tab-pin, .ml-document-tab-favorite {
+  position: absolute;
+  top: 5px;
+  width: 20px;
+  height: 20px;
+  opacity: 0;
+  pointer-events: none;
+}
+.ml-document-tab-close { right: 3px; }
+.ml-document-tab-favorite { right: 23px; }
+.ml-document-tab-pin { right: 43px; }
+.ml-document-tab :is(.ml-document-tab-close, .ml-document-tab-pin, .ml-document-tab-favorite) svg { width: 14px; height: 14px; }
+.ml-document-tab:is(.is-active, :hover, :focus-within) :is(.ml-document-tab-pin, .ml-document-tab-favorite) { opacity: .55; pointer-events: auto; }
+.ml-document-tab:is(.is-active, :hover, :focus-within) .ml-document-tab-close { opacity: 1; pointer-events: auto; }
+.ml-document-tab .ml-document-tab-tool[aria-pressed="true"] { color: var(--ml-text); }
+.ml-document-tab:is(.is-active, :hover, :focus-within) .ml-document-tab-tool[aria-pressed="true"],
+.ml-document-tab .ml-document-tab-favorite[aria-pressed="true"],
+.ml-document-tab.is-pinned .ml-document-tab-pin { opacity: 1; pointer-events: auto; }
+.ml-document-tab:not(.is-active)::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--ml-border);
+  pointer-events: none;
+}
+.ml-document-tab:has(+ .is-active)::after { display: none; }
+.ml-document-tab.is-active { z-index: 1; }
+.ml-document-tab.is-active::before, .ml-document-tab.is-active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  width: 8px;
+  height: 7px;
+  pointer-events: none;
+}
+.ml-document-tab.is-active::before { left: -8px; background: radial-gradient(circle at 0 0, transparent 6px, var(--ml-border) 6px 7px, var(--ml-surface) 7px); }
+.ml-document-tab.is-active::after { right: -8px; background: radial-gradient(circle at 100% 0, transparent 6px, var(--ml-border) 6px 7px, var(--ml-surface) 7px); }
+.ml-document-tab.is-dragging { opacity: .5; }
+.ml-document-tab.drop-before { box-shadow: inset 2px 0 var(--ml-focus-ring); }
+.ml-document-tab.drop-after { box-shadow: inset -2px 0 var(--ml-focus-ring); }
+.ml-document-tabs button:focus-visible { outline: 2px solid var(--ml-focus-ring); outline-offset: -3px; }
+@media print { .ml-document-tabs { display: none; } }

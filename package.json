@@ -1,0 +1,43 @@
+{
+  "name": "markdown-leader",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local Markdown reader with checklists and review notes for Chromium browsers",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/check-version.mjs && tsc --noEmit && vite build && node scripts/check-version.mjs --built",
+    "build:release": "node scripts/check-version.mjs && tsc --noEmit && vite build --mode release && node scripts/check-version.mjs --built",
+    "test": "node --test tests/*.test.mjs",
+    "check:syntax": "node --check src/background.js && node --check src/content/startup.js && node --check src/popup.js",
+    "check": "pnpm check:syntax && pnpm test && pnpm docs:index:check && pnpm build",
+    "python": "node scripts/python.mjs",
+    "docs:index": "node scripts/python.mjs scripts/build_docs_index.py",
+    "docs:index:check": "node scripts/python.mjs scripts/build_docs_index.py --check",
+    "version:check": "node scripts/check-version.mjs",
+    "version:patch": "npm version patch --no-git-tag-version --package-lock=false",
+    "version:minor": "npm version minor --no-git-tag-version --package-lock=false",
+    "version:major": "npm version major --no-git-tag-version --package-lock=false"
+  },
+  "dependencies": {
+    "@mdit/plugin-tex": "1.1.1",
+    "highlight.js": "^11.6.0",
+    "katex": "0.18.7",
+    "markdown-it": "^15.0.1",
+    "markdown-it-deflist": "4.0.0",
+    "markdown-it-emoji": "3.1.0",
+    "markdown-it-footnote": "4.0.0",
+    "markdown-it-github-alerts": "1.0.1",
+    "markdown-it-ins": "4.0.0",
+    "markdown-it-mark": "4.0.0",
+    "markdown-it-sub": "2.0.0",
+    "markdown-it-sup": "2.0.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "mermaid": "11.17.2"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.300",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  }
+}

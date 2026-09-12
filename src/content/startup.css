@@ -1,0 +1,3 @@
+html[data-markdown-leader-startup="pending"] body {
+  visibility: hidden !important;
+}

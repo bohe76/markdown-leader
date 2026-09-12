@@ -1,0 +1,39 @@
+.ml-status.ml-toast {
+  position: fixed;
+  inset: 16px 16px auto auto;
+  z-index: 100;
+  margin: 0;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(380px, calc(100vw - 32px));
+  min-height: 0;
+  padding: 12px;
+  display: flex;
+  align-items: start;
+  gap: 8px;
+  border: 1px solid var(--ml-border);
+  border-radius: 10px;
+  background: var(--ml-surface);
+  color: var(--ml-text);
+  box-shadow: 0 8px 24px #0002;
+  font: 13px/1.4 var(--ml-font-family, system-ui, sans-serif);
+}
+.ml-status.ml-toast[hidden] { display: none; }
+.ml-toast.error::before { content: '!'; color: var(--ml-error); font-weight: 700; }
+.ml-toast-message { min-width: 0; flex: 1; overflow-wrap: anywhere; white-space: pre-line; }
+.ml-toast button {
+  flex: none;
+  margin: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--ml-border);
+  border-radius: 6px;
+  background: var(--ml-surface);
+  color: var(--ml-text);
+  font: 600 13px/1.4 var(--ml-font-family, system-ui, sans-serif);
+  cursor: pointer;
+}
+.ml-toast button:hover { background: var(--ml-hover); }
+.ml-toast button:focus-visible { outline: 2px solid var(--ml-focus-ring); outline-offset: 2px; }
+.ml-toast .ml-toast-dismiss { border-color: transparent; font-size: 18px; line-height: 18px; padding: 2px 4px; }
+.ml-toast::backdrop { display: none; }
+@media print { .ml-status.ml-toast { display: none; } }
