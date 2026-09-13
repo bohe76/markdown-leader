@@ -1,0 +1,28 @@
+.ml-document.ml-paged-document { width: 210mm; max-width: none; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.ml-document.ml-paged-document > .ml-pdf-page:first-child { margin-top: 0; }
+.ml-pdf-measure { position: fixed; left: -100000px; top: 0; width: 210mm; visibility: hidden; pointer-events: none; }
+.ml-pdf-dialog {
+  width: calc(100vw - 32px); max-width: 1100px; height: calc(100vh - 32px); max-height: none;
+  padding: 0; border: 1px solid var(--ml-border); border-radius: 12px;
+  background: var(--ml-bg); color: var(--ml-text); font: 13px/1.4 var(--ml-font-family);
+}
+.ml-pdf-dialog::backdrop { background: #0006; }
+.ml-pdf-dialog[open] { display: flex; flex-direction: column; }
+.ml-pdf-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--ml-border); background: var(--ml-surface); }
+.ml-pdf-toolbar h2 { margin: 0; font-size: 14px; flex: 1; }
+.ml-pdf-toolbar p { flex: 0 0 100%; margin: 0; color: var(--ml-muted); font-size: 12px; }
+.ml-pdf-toolbar button { min-height: 32px; padding: 6px 12px; border: 1px solid var(--ml-border); border-radius: 8px; background: var(--ml-surface); color: var(--ml-text); font: inherit; font-weight: 600; cursor: pointer; }
+.ml-pdf-toolbar button:hover { background: var(--ml-hover); }
+.ml-pdf-toolbar button:disabled { opacity: .4; cursor: default; }
+.ml-pdf-status { padding: 8px 16px; color: var(--ml-muted); }
+.ml-pdf-status[data-error="true"] { color: var(--ml-error); }
+.ml-pdf-frame { width: 100%; min-height: 0; flex: 1; border: 0; background: var(--ml-bg); }
+@page { size: A4; margin: 0; }
+@media print {
+  html, body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ml-main { margin: 0 !important; padding: 0 !important; }
+  .ml-document.ml-paged-document { margin: 0; }
+  .ml-pdf-dialog, .ml-pdf-measure, .ml-copy { display: none !important; }
+  .ml-diagram[data-diagram-state="rendered"] details:not([open]) { visibility: hidden; }
+  .ml-document.ml-paged-document > .ml-pdf-page { margin: 0; box-shadow: none; }
+}
