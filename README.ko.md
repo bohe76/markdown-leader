@@ -8,6 +8,12 @@ Claude, ChatGPT, OpenAI Codex, Gemini, Google Antigravity 같은 AI 도구가 �
 
 데스크톱 Chrome 121 이상을 대상으로 합니다. [Chrome 웹스토어](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm)에는 1.1.0이 공개되어 있습니다. 이 저장소는 1.2.0 소스 스냅샷이므로 다음 스토어 버전이 공개될 때까지 현재 공개 패키지와 다를 수 있습니다.
 
+## 실제 동작
+
+공개된 1.1.0에서 폴더 정렬, 사이드바 폭 조절, A4/PDF 미리보기와 위치가 바뀐 파일 재연결을 확인할 수 있습니다.
+
+[![Markdown Leader 1.1.0 실제 동작](assets/markdown-leader-1.1.0-demo.gif)](assets/markdown-leader-1.1.0-demo.gif)
+
 ## 주요 기능
 
 - 파일 URL, 확장 팝업, 파일·폴더 선택창 또는 드래그 앤 드롭으로 로컬 Markdown 열기

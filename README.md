@@ -8,6 +8,12 @@ Use it to review Markdown produced by Claude, ChatGPT, OpenAI Codex, Gemini, Goo
 
 Markdown Leader targets desktop Chrome 121 or later. Version 1.1.0 is publicly available in the [Chrome Web Store](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm). This repository contains the 1.2.0 source snapshot and can differ from the currently published package until the next store version is published.
 
+## Demo
+
+The published 1.1.0 workflow below shows folder sorting, sidebar resizing, A4/PDF preview, and reconnecting moved files.
+
+[![Markdown Leader 1.1.0 workflow demo](assets/markdown-leader-1.1.0-demo.gif)](assets/markdown-leader-1.1.0-demo.gif)
+
 ## Features
 
 - Open local Markdown files from a file URL, the extension popup, a file/folder picker, or drag and drop.
