@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Markdown Leader">
+  <title>Markdown Leader</title>
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="#0088ff"/>
+  <rect x="32" y="22" width="64" height="84" rx="10" fill="#ffffff"/>
+  <path fill="#0088ff" d="M75 22h21v21z"/>
+  <path fill="#bfe5ff" d="M75 22v21h21z"/>
+  <path fill="none" stroke="#0088ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="9" d="M45 79V51l19 18 19-18v28"/>
+</svg>
