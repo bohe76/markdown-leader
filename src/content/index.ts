@@ -10,6 +10,7 @@ import { renderLibraryList } from './reader-library-ui.mjs'
 import { createReviewUI } from './review-ui.mjs'
 import { createRatingRequest } from './rating-request.mjs'
 import { createReleaseNotes } from './release-notes.mjs'
+import { createMarkdownGuide } from './markdown-guide.mjs'
 import reviewStyle from './review-ui.css?inline'
 import { parseReview, writeReview, patchTask, markdownReviewSource } from './review-source.mjs'
 import { writeFileRevision } from './file-writer.mjs'
@@ -244,6 +245,7 @@ app.innerHTML = `
       <button class="ml-icon-button" data-tab="favorites" type="button" data-tooltip="${escapeHtml(t('readerFavorites'))}" aria-label="${escapeHtml(t('readerFavorites'))}" aria-pressed="false">${readerIcon('star')}</button>
       <button class="ml-icon-button" data-review-toggle type="button" data-tooltip="${escapeHtml(t('reviewTitle'))}" aria-label="${escapeHtml(t('reviewTitle'))}" aria-expanded="false">${readerIcon('note')}</button>
       <button class="ml-icon-button" data-pdf-open type="button" disabled data-tooltip="${escapeHtml(t('pdfPreview'))}" aria-label="${escapeHtml(t('pdfPreview'))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6zM17 12h1"/></svg></button>
+      <button class="ml-icon-button" data-markdown-guide type="button" data-tooltip="${escapeHtml(t('markdownGuideButton'))}" aria-label="${escapeHtml(t('markdownGuideButton'))}">${readerIcon('info')}</button>
       <button class="ml-icon-button" data-tab="settings" type="button" data-tooltip="${escapeHtml(t('readerSettings'))}" aria-label="${escapeHtml(t('readerSettings'))}" aria-pressed="false">${readerIcon('settings')}</button>
     </nav>
     <div class="ml-explorer">
@@ -376,7 +378,11 @@ const releaseNotes = createReleaseNotes({
   },
 })
 app.append(releaseNotes.element)
-window.addEventListener('pagehide', () => releaseNotes.destroy(), { once: true })
+const markdownGuide = createMarkdownGuide({
+  document, t, button: app.querySelector<HTMLButtonElement>('[data-markdown-guide]')!,
+})
+app.append(markdownGuide.element)
+window.addEventListener('pagehide', () => { releaseNotes.destroy(); markdownGuide.destroy() }, { once: true })
 const library = createReaderLibrary({ storage: chrome.storage.local, indexedDB, locks: storageLock, onChange: () => updateLibraryPanels() })
 const reviewUI = createReviewUI({ document, window, content, t, onSave: async ({ documentId, expectedRaw, notes }: any) => {
   return saveDocumentRevision(documentId, expectedRaw, writeReview(expectedRaw, notes))

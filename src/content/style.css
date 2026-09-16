@@ -180,7 +180,9 @@ input[type="checkbox"]:focus-visible { outline: 2px solid var(--ml-focus-ring); 
 .ml-document-toc ul { margin: 0; padding-left: 16px; list-style: none; }
 .ml-document-toc > ul { padding-left: 0; }
 .ml-document img { max-width: 100%; height: auto; border-radius: 8px; }
-.ml-document table { display: table; width: auto; max-width: 100%; border-collapse: collapse; }
+.ml-document table { display: table; max-width: 100%; border-collapse: collapse; }
+.ml-document table:not([width]) { width: auto; }
+.ml-document table + table:not(.ml-pdf-continuation) { margin-block-start: 16px; }
 .ml-document th, .ml-document td { border: 1px solid var(--ml-border); padding: 7px 11px; }
 .ml-document :is(th, td).ml-pdf-compact { overflow-wrap: break-word; }
 .ml-document :is(th, td).ml-pdf-nowrap { white-space: nowrap; overflow-wrap: normal; }
@@ -287,12 +289,30 @@ input[type="checkbox"]:focus-visible { outline: 2px solid var(--ml-focus-ring); 
 .ml-release-notes-header h2 { flex: 1; }
 .ml-confirm-dialog .ml-release-notes-close { margin: -8px -8px 0 0; padding: 2px 7px; border-color: transparent; background: transparent; font-size: 20px; line-height: 1; }
 .ml-release-notes-list { display: grid; gap: 8px; margin: -4px 0 20px; padding-left: 20px; }
+.ml-markdown-guide-dialog { width: min(440px, calc(100vw - 24px)); max-height: min(760px, calc(100vh - 8px)); overflow: auto; }
+.ml-markdown-guide-header { display: flex !important; align-items: flex-start; justify-content: space-between !important; gap: 12px; }
+.ml-markdown-guide-header h2 { flex: 1; }
+.ml-confirm-dialog .ml-markdown-guide-close { margin: -8px -8px 0 0; padding: 2px 7px; border-color: transparent; background: transparent; font-size: 20px; line-height: 1; }
+.ml-markdown-guide-summary { margin-bottom: 16px !important; }
+.ml-markdown-guide-legend { display: grid; grid-template-columns: minmax(76px, .65fr) minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin: 0 0 4px; color: var(--ml-muted); font-size: 11px; line-height: 1.4; }
+.ml-markdown-guide-section { margin: 0 0 12px; }
+.ml-markdown-guide-section h3 { margin: 0 0 6px; color: var(--ml-accent-strong); font-size: 13px; }
+.ml-markdown-guide-list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.ml-markdown-guide-list li { display: grid; grid-template-columns: minmax(76px, .65fr) minmax(0, 1fr) minmax(0, 1fr); align-items: baseline; gap: 4px 8px; min-width: 0; }
+.ml-markdown-guide-list code { max-width: 100%; padding: 2px 5px; color: var(--ml-text); background: var(--ml-inline-code-bg); overflow-wrap: anywhere; }
+.ml-markdown-guide-label { min-width: 0; color: var(--ml-text); font-size: 11px; font-weight: 600; overflow-wrap: anywhere; }
+.ml-markdown-guide-rendered { min-width: 0; color: var(--ml-text); overflow-wrap: anywhere; }
 .ml-confirm-dialog p { margin: 0 0 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .ml-confirm-dialog > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.ml-confirm-dialog > .ml-markdown-guide-legend { display: grid; flex-wrap: initial; justify-content: initial; }
 .ml-confirm-dialog :is(button, a) { padding: 7px 12px; border: 1px solid var(--ml-border); border-radius: 6px; background: var(--ml-bg); color: var(--ml-text); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
 .ml-confirm-dialog :is(button, a):hover { background: var(--ml-hover); }
 .ml-confirm-dialog :is(button, a):focus-visible { outline: 2px solid var(--ml-focus-ring); outline-offset: 2px; }
 .ml-confirm-dialog .ml-primary-action { border-color: var(--ml-accent-strong); background: var(--ml-accent-strong); color: var(--ml-surface); }
 .ml-confirm-dialog .ml-primary-action:hover { background: var(--ml-accent-strong); }
 :root[data-ml-theme="dark"] .ml-confirm-dialog .ml-primary-action { color: var(--ml-bg); }
+.ml-confirm-dialog :is(button, a).ml-markdown-guide-close { margin: -8px -8px 0 0; padding: 2px 7px; border-color: transparent; background: transparent; font-size: 20px; line-height: 1; }
+@media (max-width: 380px) {
+  .ml-markdown-guide-legend, .ml-markdown-guide-list li { grid-template-columns: minmax(66px, .65fr) minmax(0, 1fr) minmax(0, 1fr); gap: 4px; }
+}
 .ml-document input[data-task-line] { cursor: pointer; pointer-events: auto; }

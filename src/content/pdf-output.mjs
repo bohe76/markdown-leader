@@ -9,7 +9,9 @@ export const PDF_CONTENT_STYLE = `
   overflow: visible; background: transparent; }
 .ml-pdf-content > :first-child { margin-top: 0; }
 .ml-pdf-content > :last-child { margin-bottom: 0; }
-.ml-pdf-content table { display: table; width: auto; max-width: 100%; table-layout: auto; overflow: visible; }
+.ml-pdf-content table { display: table; max-width: 100%; table-layout: auto; overflow: visible; }
+.ml-pdf-content table:not([width]) { width: auto; }
+.ml-pdf-content table + table:not(.ml-pdf-continuation) { margin-block-start: 16px; }
 .ml-pdf-content { widows: 1; orphans: 1; }
 .ml-pdf-content :is(th, td) { overflow-wrap: anywhere; }
 .ml-pdf-content :is(th, td).ml-pdf-compact { overflow-wrap: break-word; }
@@ -123,7 +125,7 @@ export function fitTableWrapping(table) {
     generatedColumns.remove()
     table.style.removeProperty('width')
     table.style.removeProperty('table-layout')
-  } else if (table.querySelector(':scope > colgroup') || table.style.width || table.style.tableLayout) return
+  } else if (table.querySelector(':scope > colgroup') || table.hasAttribute('width') || table.style.width || table.style.tableLayout) return
   const cells = [...table.rows].flatMap(row => [...row.cells])
   if (!cells.length || cells.some(cell => cell.colSpan !== 1 || cell.rowSpan !== 1)) return
   for (const cell of cells) cell.classList.remove('ml-pdf-compact', 'ml-pdf-nowrap')
@@ -133,6 +135,44 @@ export function fitTableWrapping(table) {
   const columnCount = table.rows[0]?.cells.length || 0
   if (!columnCount || available <= 0) return
   const wideTable = table.getBoundingClientRect().width >= available * 0.75
+  function multilineColumns() {
+    const result = new Set()
+    for (const cell of cells) {
+      if (cell.querySelector('br')) {
+        result.add(cell.cellIndex)
+        continue
+      }
+      const rects = []
+      const walker = doc.createTreeWalker(cell, 4)
+      let text
+      while ((text = walker.nextNode())) {
+        if (!text.data.trim() || text.parentElement.closest('svg,.ml-math,script,style')) continue
+        const range = doc.createRange()
+        range.selectNodeContents(text)
+        for (const rect of range.getClientRects()) {
+          if (rect.width > 0 && rect.height > 0) rects.push(rect)
+        }
+      }
+      // 이미지·체크박스·인라인 수식은 텍스트 노드가 아니므로 별도로 줄을 센다.
+      for (const atom of cell.querySelectorAll('img,svg,input,.ml-math')) {
+        if (atom.parentElement?.closest('.ml-math')) continue
+        const rect = atom.getBoundingClientRect()
+        if (rect.width > 0 && rect.height > 0) rects.push(rect)
+      }
+      let top = -Infinity
+      let bottom = Infinity
+      for (const rect of rects) {
+        // 인라인 강조·첨자의 겹치는 글자 영역은 같은 줄로 센다.
+        top = Math.max(top, rect.top)
+        bottom = Math.min(bottom, rect.bottom)
+        if (bottom <= top + 0.5) {
+          result.add(cell.cellIndex)
+          break
+        }
+      }
+    }
+    return result
+  }
   const absoluteMinimum = Math.min(48, available / columnCount * 0.75)
   const readableMinimum = Math.max(absoluteMinimum, Math.min(96, available / columnCount * 0.65))
   const protectionLimit = 170
@@ -172,7 +212,7 @@ export function fitTableWrapping(table) {
       for (const cell of group.cells) cell.classList.remove('ml-pdf-nowrap')
       if (overflows()) for (const cell of group.cells) cell.classList.remove('ml-pdf-compact')
     }
-    return
+    if (!multilineColumns().size) return
   }
   function minimumWidths() {
     const protectedWidths = Array(columnCount).fill(0)
@@ -258,6 +298,20 @@ export function fitTableWrapping(table) {
   table.style.width = `${fittedWidth}px`
   table.style.tableLayout = 'fixed'
   table.prepend(columns)
+  // 열 배분 뒤 실제 줄바꿈을 확인한다. 남은 폭은 여러 줄 열에만 배분한다.
+  const multiline = multilineColumns()
+  if (multiline.size && fittedWidth < available) {
+    const flexible = [...multiline].filter(index => widths[index] > 0)
+    const flexibleWidth = flexible.reduce((sum, index) => sum + widths[index], 0)
+    const targets = flexibleWidth > 0 ? flexible : widths.map((_width, index) => index)
+    const targetWidth = targets.reduce((sum, index) => sum + widths[index], 0)
+    const extra = available - fittedWidth
+    for (const index of targets) {
+      const column = columns.children[index]
+      column.style.width = `${widths[index] + extra * widths[index] / targetWidth}px`
+    }
+    table.style.width = `${available}px`
+  }
 }
 
 /** @param {{isCurrent?: () => boolean, errorMessage?: string}} [options] */
