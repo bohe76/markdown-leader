@@ -1,0 +1,54 @@
+name: Bug report
+description: Report a reproducible problem with Markdown Leader.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Do not include private documents, full logs, local paths, passwords, or tokens. For a security vulnerability, use bohe76@gmail.com instead of a public issue.
+  - type: checkboxes
+    id: existing-issues
+    attributes:
+      label: Existing issues
+      options:
+        - label: I searched the existing issues before filing this report.
+          required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest set of steps that shows the problem. Use a synthetic Markdown sample if one is needed.
+      placeholder: |
+        1. Open ...
+        2. Choose ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+      description: Tell us what you expected and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: extension-version
+    attributes:
+      label: Markdown Leader version
+      placeholder: "1.3.0"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Chrome and operating system
+      placeholder: "Chrome 140 on Windows 10"
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add only sanitized screenshots, a synthetic sample, or other information that does not expose private content.
+    validations:
+      required: false

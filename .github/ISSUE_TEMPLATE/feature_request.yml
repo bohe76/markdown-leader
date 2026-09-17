@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest an improvement to the Markdown review workflow.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing an idea. Do not include private documents, passwords, tokens, or local paths. Security vulnerabilities belong at bohe76@gmail.com, not in a public issue.
+  - type: checkboxes
+    id: existing-issues
+    attributes:
+      label: Existing issues
+      options:
+        - label: I searched the existing issues before filing this request.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or workflow
+      description: What review task is difficult today? Describe it without sharing private document contents.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome
+      description: Describe the result you would expect, rather than only a specific implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What do you do today when this workflow is unavailable?
+    validations:
+      required: false

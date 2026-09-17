@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability privately
+    url: mailto:bohe76@gmail.com?subject=Markdown%20Leader%20security%20report
+    about: Do not disclose security vulnerabilities in a public issue.
