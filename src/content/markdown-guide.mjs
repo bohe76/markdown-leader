@@ -1,5 +1,4 @@
 const githubRules = [
-  ['markdownGuideStrikeSingleSyntax', 'markdownGuideStrikeResult', 'strike'],
   ['markdownGuideStrikeDoubleSyntax', 'markdownGuideStrikeResult', 'strike'],
   ['markdownGuideSubscriptSyntax', 'markdownGuideSubscriptResult', 'subscript'],
   ['markdownGuideSuperscriptSyntax', 'markdownGuideSuperscriptResult', 'superscript'],
@@ -106,21 +105,62 @@ export function createMarkdownGuide({ document, t, button }) {
     ['markdownGuideHtmlSafety', 'markdownGuideHtmlSafetyResult', 'html-safety'],
     ['markdownGuideCodeSafety', 'markdownGuideCodeSafetyResult', 'code-safety'],
   ], 'ml-markdown-guide-safety-title')
+  const syntaxPanel = document.createElement('div')
+  syntaxPanel.id = 'ml-markdown-guide-syntax'
+  syntaxPanel.setAttribute('role', 'tabpanel')
+  syntaxPanel.append(createGuideLegend(document, t), ruleSection(document, t, 'markdownGuideGithubHeading', githubRules, 'ml-markdown-guide-github-title'), ruleSection(document, t, 'markdownGuideExtensionHeading', extensionRules, 'ml-markdown-guide-extension-title'), safety)
+  const shortcutsPanel = document.createElement('div')
+  shortcutsPanel.id = 'ml-markdown-guide-shortcuts'
+  shortcutsPanel.setAttribute('role', 'tabpanel')
+  shortcutsPanel.hidden = true
+  const shortcutList = document.createElement('ul')
+  shortcutList.className = 'ml-markdown-guide-shortcuts'
+  for (const [key, label] of [['O', 'shortcutOpenFile'], ['K', 'shortcutOpenFolder'], ['S', 'shortcutSearch'], ['M', 'shortcutNotes'], ['P', 'shortcutPdf'], ['G', 'shortcutGuide'], ['R', 'shortcutRefresh'], ['T', 'shortcutTheme']]) {
+    const item = document.createElement('li')
+    item.innerHTML = `<kbd>Alt</kbd><kbd>${key}</kbd>`
+    item.append(document.createTextNode(t(label)))
+    shortcutList.append(item)
+  }
+  shortcutsPanel.append(shortcutList)
+  const tabs = document.createElement('div')
+  tabs.className = 'ml-markdown-guide-tabs'
+  tabs.setAttribute('role', 'tablist')
+  const tabButtons = [['syntax', 'markdownGuideSyntaxTab', syntaxPanel], ['shortcuts', 'markdownGuideShortcutsTab', shortcutsPanel]].map(([name, key, panel], index) => {
+    const tab = document.createElement('button')
+    tab.type = 'button'
+    tab.id = `ml-markdown-guide-${name}-tab`
+    tab.setAttribute('role', 'tab')
+    tab.setAttribute('aria-controls', panel.id)
+    tab.setAttribute('aria-selected', String(index === 0))
+    tab.tabIndex = index === 0 ? 0 : -1
+    tab.textContent = t(key)
+    tabs.append(tab)
+    return [tab, panel]
+  })
+  function selectTab(index) {
+    tabButtons.forEach(([tab, panel], itemIndex) => {
+      const selected = itemIndex === index
+      tab.setAttribute('aria-selected', String(selected))
+      tab.tabIndex = selected ? 0 : -1
+      panel.hidden = !selected
+    })
+  }
+  tabButtons.forEach(([tab], index) => tab.addEventListener('click', () => selectTab(index)))
+  tabs.addEventListener('keydown', (event) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    const current = tabButtons.findIndex(([tab]) => tab === document.activeElement)
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabButtons.length - 1 : (current + (event.key === 'ArrowRight' ? 1 : tabButtons.length - 1)) % tabButtons.length
+    selectTab(next)
+    tabButtons[next][0].focus()
+  })
 
-  const actions = document.createElement('div')
-  const done = document.createElement('button')
-  done.type = 'button'
-  done.className = 'ml-primary-action'
-  done.textContent = t('markdownGuideDone')
-  actions.append(done)
   element.append(
     header,
     summary,
-    createGuideLegend(document, t),
-    ruleSection(document, t, 'markdownGuideGithubHeading', githubRules, 'ml-markdown-guide-github-title'),
-    ruleSection(document, t, 'markdownGuideExtensionHeading', extensionRules, 'ml-markdown-guide-extension-title'),
-    safety,
-    actions,
+    tabs,
+    syntaxPanel,
+    shortcutsPanel,
   )
 
   let previousFocus = null
@@ -132,13 +172,13 @@ export function createMarkdownGuide({ document, t, button }) {
   function show() {
     if (element.open || document.querySelector('dialog[open]')) return false
     previousFocus = document.activeElement
+    selectTab(0)
     element.showModal()
     close.focus()
     return true
   }
   button.addEventListener('click', show)
   close.addEventListener('click', hide)
-  done.addEventListener('click', hide)
   element.addEventListener('cancel', event => { event.preventDefault(); hide() })
 
   return {

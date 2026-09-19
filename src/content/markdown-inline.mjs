@@ -8,10 +8,10 @@ function githubStrikethrough(state, silent) {
   const markup = '~'.repeat(scanned.length)
   const token = state.push('text', '', 0)
   token.content = markup
-  // GFM은 같은 길이의 한 개 또는 두 개 구분자만 짝지으며 세 개 이상은 문자다.
-  if (scanned.length <= 2) {
+  // GFM 취소선은 정확히 두 개의 물결표를 구분자로 사용한다.
+  if (scanned.length === 2) {
     state.delimiters.push({
-      marker: scanned.length === 1 ? 0x7e : 0x7e7e,
+      marker: 0x7e7e,
       length: 0,
       token: state.tokens.length - 1,
       end: -1,
@@ -43,10 +43,18 @@ function finishStrikethrough(state) {
 
 function safeInlineTag(state, silent) {
   if (state.src.charCodeAt(state.pos) !== 0x3c) return false
-  const match = /^(<br(?: ?\/)?>|<(\/?)(sub|sup|ins)>)/i.exec(state.src.slice(state.pos))
+  const match = /^(<br(?: ?\/)?>|<(\/?)(sub|sup|ins)>|<a id=(?:"([A-Za-z][A-Za-z0-9_-]*)"|“([A-Za-z][A-Za-z0-9_-]*)”)><\/a>)/i.exec(state.src.slice(state.pos))
   if (!match) return false
   if (!silent) {
-    if (!match[3]) {
+    const anchorId = match[4] || match[5]
+    if (anchorId) {
+      const ids = state.env.markdownLeaderAnchorIds ||= new Set()
+      if (ids.has(anchorId)) return false
+      ids.add(anchorId)
+      const open = state.push('a_open', 'a', 1)
+      open.attrSet('id', anchorId)
+      state.push('a_close', 'a', -1)
+    } else if (!match[3]) {
       state.push('hardbreak', 'br', 0)
     } else {
       const token = state.push('text', '', 0)

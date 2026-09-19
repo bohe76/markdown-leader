@@ -289,19 +289,29 @@ input[type="checkbox"]:focus-visible { outline: 2px solid var(--ml-focus-ring); 
 .ml-release-notes-header h2 { flex: 1; }
 .ml-confirm-dialog .ml-release-notes-close { margin: -8px -8px 0 0; padding: 2px 7px; border-color: transparent; background: transparent; font-size: 20px; line-height: 1; }
 .ml-release-notes-list { display: grid; gap: 8px; margin: -4px 0 20px; padding-left: 20px; }
-.ml-markdown-guide-dialog { width: min(440px, calc(100vw - 24px)); max-height: min(760px, calc(100vh - 8px)); overflow: auto; }
+.ml-markdown-guide-dialog { box-sizing: border-box; width: min(440px, calc(100vw - 24px)); height: min(712px, calc(100vh - 8px)); max-height: min(760px, calc(100vh - 8px)); overflow: auto; }
 .ml-markdown-guide-header { display: flex !important; align-items: flex-start; justify-content: space-between !important; gap: 12px; }
 .ml-markdown-guide-header h2 { flex: 1; }
 .ml-confirm-dialog .ml-markdown-guide-close { margin: -8px -8px 0 0; padding: 2px 7px; border-color: transparent; background: transparent; font-size: 20px; line-height: 1; }
 .ml-markdown-guide-summary { margin-bottom: 16px !important; }
-.ml-markdown-guide-legend { display: grid; grid-template-columns: minmax(76px, .65fr) minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin: 0 0 4px; color: var(--ml-muted); font-size: 11px; line-height: 1.4; }
+.ml-markdown-guide-tabs { display: flex; justify-content: flex-start; gap: 0; margin: 0 0 12px; box-shadow: inset 0 -1px 0 var(--ml-border); }
+.ml-confirm-dialog > .ml-markdown-guide-tabs { justify-content: flex-start; }
+.ml-markdown-guide-tabs button { position: relative; margin-bottom: -1px; border: 1px solid transparent; border-bottom-color: var(--ml-border); border-radius: 7px 7px 0 0; background: transparent; color: var(--ml-muted); }
+.ml-markdown-guide-tabs button[aria-selected="true"] { z-index: 1; border-color: var(--ml-border); border-bottom-color: var(--ml-surface); background: var(--ml-surface); color: var(--ml-text); font-weight: 600; }
+.ml-markdown-guide-dialog > [role="tabpanel"] { display: block; }
+.ml-markdown-guide-dialog > [role="tabpanel"][hidden] { display: none; }
+.ml-markdown-guide-shortcuts { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ml-markdown-guide-shortcuts li { display: flex; align-items: center; gap: 4px; color: var(--ml-text); }
+.ml-markdown-guide-shortcuts kbd { min-width: 19px; padding: 1px 4px; border: 1px solid var(--ml-border); border-bottom-width: 2px; border-radius: 4px; background: var(--ml-bg); font: 10px/1.4 var(--ml-font-family); text-align: center; }
+.ml-markdown-guide-legend { display: grid; grid-template-columns: minmax(76px, .65fr) minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin: 0 0 4px; padding: 5px 0; color: var(--ml-muted); background: var(--ml-bg); border-radius: 6px; font-size: 11px; line-height: 1.4; text-align: center; }
 .ml-markdown-guide-section { margin: 0 0 12px; }
 .ml-markdown-guide-section h3 { margin: 0 0 6px; color: var(--ml-accent-strong); font-size: 13px; }
-.ml-markdown-guide-list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
-.ml-markdown-guide-list li { display: grid; grid-template-columns: minmax(76px, .65fr) minmax(0, 1fr) minmax(0, 1fr); align-items: baseline; gap: 4px 8px; min-width: 0; }
+.ml-markdown-guide-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.ml-markdown-guide-list li { display: grid; grid-template-columns: minmax(76px, .65fr) minmax(0, 1fr) minmax(0, 1fr); align-items: baseline; gap: 4px 8px; min-width: 0; padding: 4px 0; border-bottom: 1px solid var(--ml-border); }
+.ml-markdown-guide-list li:last-child { border-bottom: 0; }
 .ml-markdown-guide-list code { max-width: 100%; padding: 2px 5px; color: var(--ml-text); background: var(--ml-inline-code-bg); overflow-wrap: anywhere; }
 .ml-markdown-guide-label { min-width: 0; color: var(--ml-text); font-size: 11px; font-weight: 600; overflow-wrap: anywhere; }
-.ml-markdown-guide-rendered { min-width: 0; color: var(--ml-text); overflow-wrap: anywhere; }
+.ml-markdown-guide-rendered { min-width: 0; color: var(--ml-text); overflow-wrap: anywhere; text-align: center; }
 .ml-confirm-dialog p { margin: 0 0 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .ml-confirm-dialog > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .ml-confirm-dialog > .ml-markdown-guide-legend { display: grid; flex-wrap: initial; justify-content: initial; }

@@ -1,3 +1,13 @@
+# OMX local runtime state
+.omx/
+
+# Local dependencies and generated artifacts
 node_modules/
 dist/
-.snapshots/
+screenshots/
+release/
+__pycache__/
+.venv/
+
+# Word 엔진 비교 샘플 제외: 결과 요약 문서와 실행 코드는 추적
+scripts/experiments/word_export/fixtures/

@@ -1271,6 +1271,19 @@ async function chooseSource(folder: boolean) {
   }
 }
 
+async function chooseLinkedDocument() {
+  if (choosingSource) return
+  choosingSource = true
+  try {
+    const handle = await pickOriginal('file')
+    if (handle) await adoptHandle(handle)
+  } catch (error) {
+    if ((error as Error).name !== 'AbortError') reportError(t('readerChooseFailed'), '', error)
+  } finally {
+    choosingSource = false
+  }
+}
+
 app.querySelectorAll('[data-open-folder]').forEach((button) => button.addEventListener('click', () => { void chooseSource(true) }))
 app.querySelectorAll('[data-open-file]').forEach((button) => button.addEventListener('click', () => { void chooseSource(false) }))
 const tooltip = app.querySelector<HTMLElement>('.ml-tooltip')!
@@ -1305,6 +1318,24 @@ app.querySelectorAll<HTMLElement>('[data-tooltip]').forEach((button) => {
   button.addEventListener('click', hideTooltip)
 })
 document.addEventListener('keydown', (event) => {
+  const target = event.target as HTMLElement | null
+  const editing = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || Boolean(target?.isContentEditable)
+  if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.repeat && !editing) {
+    const actions: Record<string, () => void> = {
+      o: () => { void chooseSource(false) },
+      k: () => { void chooseSource(true) },
+      s: toggleSearch,
+      m: () => reviewUI.toggle(),
+      p: () => pdfOpen.click(),
+      g: () => { markdownGuide.show() },
+    }
+    const action = actions[event.key.toLowerCase()]
+    if (action) {
+      event.preventDefault()
+      action()
+      return
+    }
+  }
   if (event.key === 'Escape') {
     hideTooltip()
     if (searchMode) { closeSearch(); app.querySelector<HTMLButtonElement>('[data-search-toggle]')!.focus() }
@@ -1635,7 +1666,8 @@ content.addEventListener('click', (event) => {
     }
     if (link.href.startsWith('file:') && isSupportedDocument(link.href)) {
       event.preventDefault()
-      void openFile(link.href, handleSource)
+      if (handleSource && (!handleSource.rootURL || !link.href.startsWith(handleSource.rootURL))) void chooseLinkedDocument()
+      else void openFile(link.href, handleSource)
     }
   }
 })

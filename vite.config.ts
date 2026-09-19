@@ -124,6 +124,7 @@ return {
               preserveEntrySignatures: 'strict',
               output: {
                 format: 'es',
+                inlineDynamicImports: true,
                 entryFileNames: 'renderers/[name].js',
                 chunkFileNames: 'renderers/[name]-[hash].js',
                 assetFileNames: 'renderers/[name]-[hash][extname]',

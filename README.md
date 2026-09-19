@@ -61,7 +61,7 @@ Notes are intentionally stored with the Markdown source. Anyone who can access t
 
 ## Install and support
 
-- Install the published 1.3.0 extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm).
+- This repository contains the 1.4.0 source snapshot. The [Chrome Web Store](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) listing shows the currently available version.
 - [Report a bug](https://github.com/bohe76/markdown-leader/issues/new?template=bug_report.yml) or [request a feature](https://github.com/bohe76/markdown-leader/issues/new?template=feature_request.yml).
 - Report security vulnerabilities privately at [bohe76@gmail.com](mailto:bohe76@gmail.com?subject=Markdown%20Leader%20security%20report). Do not post them in a public issue.
 - Enable **Allow access to file URLs** in the extension details before opening local Markdown files directly.
