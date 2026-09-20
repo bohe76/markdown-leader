@@ -1,6 +1,6 @@
 {
   "name": "markdown-leader",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
   "type": "module",
   "description": "Human review interface for AI-written Markdown in Chromium browsers",
