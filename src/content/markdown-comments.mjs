@@ -39,7 +39,7 @@ function commentBlock(state, startLine, endLine, silent) {
   comment.map = [startLine, nextLine]
   comment.content = state.getLines(startLine, nextLine, state.blkIndent, true)
 
-  // 닫는 주석 뒤의 본문은 HTML을 허용하지 않고 기존 인라인 파서로 읽는다.
+  // 닫는 주석 뒤의 본문은 기존 인라인 파서로 읽는다.
   if (trailing) {
     state.push('paragraph_open', 'p', 1)
     const inline = state.push('inline', '', 0)

@@ -1,6 +1,6 @@
 {
   "name": "markdown-leader",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "private": true,
   "type": "module",
   "description": "Human review interface for AI-written Markdown in Chromium browsers",
@@ -12,6 +12,7 @@
   "dependencies": {
     "@mathjax/mathjax-newcm-font": "4.1.3",
     "@mdit/plugin-tex": "1.1.1",
+    "dompurify": "3.4.16",
     "highlight.js": "^11.6.0",
     "markdown-it": "^15.0.1",
     "markdown-it-deflist": "4.0.0",

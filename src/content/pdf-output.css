@@ -14,6 +14,10 @@
 .ml-pdf-toolbar button { min-height: 32px; padding: 6px 12px; border: 1px solid var(--ml-border); border-radius: 8px; background: var(--ml-surface); color: var(--ml-text); font: inherit; font-weight: 600; cursor: pointer; }
 .ml-pdf-toolbar button:hover { background: var(--ml-hover); }
 .ml-pdf-toolbar button:disabled { opacity: .4; cursor: default; }
+.ml-pdf-code-style { display: inline-flex; align-items: center; gap: 6px; color: var(--ml-text); white-space: nowrap; }
+.ml-pdf-code-style select { min-height: 32px; padding: 6px 10px; color: var(--ml-text); background: var(--ml-surface); border: 1px solid var(--ml-border); border-radius: 8px; font: inherit; cursor: pointer; }
+.ml-pdf-code-style select:focus-visible { outline: none; border-color: var(--ml-accent); }
+.ml-pdf-code-style select:disabled { opacity: .4; cursor: default; }
 .ml-pdf-status { padding: 8px 16px; color: var(--ml-muted); }
 .ml-pdf-status[data-error="true"] { color: var(--ml-error); }
 .ml-pdf-frame { width: 100%; min-height: 0; flex: 1; border: 0; background: var(--ml-bg); }

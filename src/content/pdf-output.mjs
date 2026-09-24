@@ -634,6 +634,23 @@ export function createPDFPreview({ document, window, content, t, prepare, onClos
   toolbar.className = 'ml-pdf-toolbar'
   const title = document.createElement('h2')
   title.textContent = t('pdfPreview')
+  const codeStyleLabel = document.createElement('label')
+  codeStyleLabel.className = 'ml-pdf-code-style'
+  codeStyleLabel.htmlFor = 'ml-pdf-code-style'
+  const codeStyleText = document.createElement('span')
+  codeStyleText.textContent = t('readerCodeStyle')
+  const codeStyle = document.createElement('select')
+  codeStyle.id = 'ml-pdf-code-style'
+  codeStyle.dataset.testid = 'pdf-code-style'
+  for (const [value, text] of [['light', t('readerCodeStyleLight')], ['dark', t('readerCodeStyleDark')]]) {
+    const option = document.createElement('option')
+    option.value = value
+    option.textContent = text
+    codeStyle.append(option)
+  }
+  codeStyle.value = 'light'
+  codeStyle.disabled = true
+  codeStyleLabel.append(codeStyleText, codeStyle)
   const print = document.createElement('button')
   print.type = 'button'; print.dataset.pdfPrint = ''; print.textContent = t('pdfSave')
   const close = document.createElement('button')
@@ -646,7 +663,7 @@ export function createPDFPreview({ document, window, content, t, prepare, onClos
       hint.append(value)
     } else hint.append(document.createTextNode(text))
   }
-  toolbar.append(title, print, close, hint)
+  toolbar.append(title, codeStyleLabel, print, close, hint)
   const status = document.createElement('div')
   status.className = 'ml-pdf-status'; status.setAttribute('role', 'status')
   const frame = document.createElement('iframe')
@@ -656,6 +673,15 @@ export function createPDFPreview({ document, window, content, t, prepare, onClos
   let controller
   let snapshotURLs = new Set()
   let previousFocus
+  function resetCodeStyle() {
+    codeStyle.value = 'light'
+    codeStyle.disabled = true
+  }
+  function applyCodeStyle() {
+    if (codeStyle.disabled) return
+    const doc = frame.contentDocument
+    if (doc) doc.documentElement.dataset.mlCodeStyle = codeStyle.value
+  }
   function finish() {
     generation++
     controller?.abort()
@@ -664,11 +690,13 @@ export function createPDFPreview({ document, window, content, t, prepare, onClos
     element.close()
     frame.removeAttribute('srcdoc')
     frame.src = 'about:blank'
+    resetCodeStyle()
     previousFocus?.focus({ preventScroll: true })
     onClose()
   }
   close.addEventListener('click', finish)
   element.addEventListener('cancel', event => { event.preventDefault(); finish() })
+  codeStyle.addEventListener('change', applyCodeStyle)
   print.addEventListener('click', () => {
     if (!print.disabled) { frame.contentWindow.focus(); frame.contentWindow.print() }
   })
@@ -683,6 +711,7 @@ export function createPDFPreview({ document, window, content, t, prepare, onClos
       const signal = controller.signal
       const current = () => request === generation && element.open
       print.disabled = true
+      resetCodeStyle()
       delete frame.dataset.ready
       status.textContent = t('pdfPreparing'); status.dataset.error = 'false'
       element.showModal()
@@ -699,6 +728,7 @@ export function createPDFPreview({ document, window, content, t, prepare, onClos
         const root = document.documentElement
         doc.documentElement.lang = root.lang || document.body.lang || 'en'
         doc.documentElement.dataset.mlTheme = root.dataset.mlTheme || 'system'
+        doc.documentElement.dataset.mlCodeStyle = codeStyle.value
         doc.documentElement.dataset.mlFontFamily = root.dataset.mlFontFamily || 'system'
         doc.documentElement.style.cssText = root.style.cssText
         const tokens = window.getComputedStyle(root)
@@ -750,10 +780,12 @@ export function createPDFPreview({ document, window, content, t, prepare, onClos
         } else count = await paginateDocument(source, pages, { isCurrent: current, errorMessage: t('pdfLayoutFailed') })
         if (!current()) return
         print.disabled = false
+        codeStyle.disabled = false
         frame.dataset.ready = 'true'
         status.textContent = t('pdfPageCount', String(count))
       } catch (error) {
         if (!current()) return
+        codeStyle.disabled = true
         status.dataset.error = 'true'
         status.textContent = error?.message || t('pdfLayoutFailed')
       }

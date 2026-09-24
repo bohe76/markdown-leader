@@ -49,11 +49,15 @@ function safeInlineTag(state, silent) {
     const anchorId = match[4] || match[5]
     if (anchorId) {
       const ids = state.env.markdownLeaderAnchorIds ||= new Set()
-      if (ids.has(anchorId)) return false
-      ids.add(anchorId)
-      const open = state.push('a_open', 'a', 1)
-      open.attrSet('id', anchorId)
-      state.push('a_close', 'a', -1)
+      if (ids.has(anchorId)) {
+        const token = state.push('text', '', 0)
+        token.content = match[0]
+      } else {
+        ids.add(anchorId)
+        const open = state.push('a_open', 'a', 1)
+        open.attrSet('id', anchorId)
+        state.push('a_close', 'a', -1)
+      }
     } else if (!match[3]) {
       state.push('hardbreak', 'br', 0)
     } else {

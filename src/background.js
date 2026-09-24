@@ -2,6 +2,7 @@ const defaults = {
   refreshEnabled: true,
   refreshIntervalMs: 10000,
   colorMode: 'system',
+  codeStyle: 'dark',
   fontFamily: 'system',
   fontSizePx: 17,
   lineHeight: 1.8,

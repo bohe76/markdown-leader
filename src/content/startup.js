@@ -10,6 +10,7 @@
   const settingsReady = (async () => {
     if (!chrome.storage?.local) throw new Error('ML_STORAGE_UNAVAILABLE')
     return chrome.storage.local.get([
+      'codeStyle',
       'refreshEnabled', 'refreshIntervalMs', 'colorMode', 'fontFamily', 'fontSizePx', 'lineHeight', 'contentWidthPx', 'widthMode', 'readingSettingsOpen', 'directorySort', 'sidebarWidthPx',
     ])
   })()

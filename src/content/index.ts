@@ -25,6 +25,8 @@ import { markdownComments } from './markdown-comments.mjs'
 import { highlightMatches, searchableText } from './search'
 import { markdownStructure, populateDocumentToc } from './markdown-structure.mjs'
 import { markdownInline } from './markdown-inline.mjs'
+import { markdownHtml } from './markdown-html.mjs'
+import { markdownConvertedTables } from './markdown-converted-tables.mjs'
 import { markdownAlerts } from './markdown-alerts.mjs'
 import { markdownFootnotes } from './markdown-footnotes.mjs'
 import definitions from 'markdown-it-deflist'
@@ -96,6 +98,7 @@ interface Settings {
   refreshEnabled: boolean
   refreshIntervalMs: number
   colorMode: Theme
+  codeStyle: 'light' | 'dark'
   fontFamily: FontFamily
   fontSizePx: number
   lineHeight: number
@@ -113,6 +116,7 @@ const defaults: Settings = {
   refreshEnabled: true,
   refreshIntervalMs: 10000,
   colorMode: 'system',
+  codeStyle: 'dark',
   fontFamily: 'system',
   fontSizePx: 17,
   lineHeight: 1.8,
@@ -189,7 +193,7 @@ function escapeHtml(value: string): string {
 }
 
 const md = new MarkdownIt({
-  html: false,
+  html: true,
   linkify: true,
   typographer: true,
   highlight(code: string, language: string): string {
@@ -200,6 +204,7 @@ const md = new MarkdownIt({
   },
 }).use(markdownComments).use(taskLists, { enabled: false, label: true })
   .use(markdownInline)
+  .use(markdownConvertedTables)
   .use(markdownStructure, { tocLabel: t('readerOutline') })
   .use(markdownAlerts, { t })
   .use(markdownFootnotes, { t })
@@ -207,6 +212,10 @@ const md = new MarkdownIt({
   .use(markdownMath)
   .use(markdownDiagrams)
   .use(markdownReviewSource)
+  .use(markdownHtml, {
+    getBaseURL: () => currentFileURL,
+    getLocalImages: () => Boolean(handleSource),
+  })
 
 md.validateLink = (url: string) => resolveSafeURL(url, currentFileURL, 'link') !== null
 const defaultLinkOpen = md.renderer.rules.link_open || ((tokens: any[], index: number, options: any, _env: any, self: any) => self.renderToken(tokens, index, options))
@@ -267,8 +276,6 @@ app.innerHTML = `
     <div class="ml-panel ml-settings-panel" data-panel="settings">
     <details class="ml-settings">
       <summary><span>${escapeHtml(t('readerReadingSettings'))}</span><svg class="ml-settings-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></summary>
-      <label class="ml-setting-row"><span>${escapeHtml(t('readerAutomaticRefresh'))}</span><input class="ml-switch" data-testid="refresh-enabled" type="checkbox" role="switch"></label>
-      <label class="ml-setting-row"><span>${escapeHtml(t('readerRefreshInterval'))}</span><span class="ml-number-unit"><input data-testid="refresh-interval" type="number" min="0.5" max="600" step="0.5"><span>${escapeHtml(t('readerSecondsUnit'))}</span></span></label>
       <fieldset class="ml-setting-group">
         <legend>${escapeHtml(t('readerTheme'))}</legend>
         <div class="ml-segmented" role="group" aria-label="${escapeHtml(t('readerTheme'))}">
@@ -277,6 +284,7 @@ app.innerHTML = `
           <button data-testid="theme-system" data-theme="system" type="button" aria-pressed="false">${escapeHtml(t('readerThemeSystem'))}</button>
         </div>
       </fieldset>
+      <label class="ml-setting-row ml-code-style-setting"><span>${escapeHtml(t('readerCodeStyle'))}</span><select data-testid="code-style"><option value="light">${escapeHtml(t('readerCodeStyleLight'))}</option><option value="dark">${escapeHtml(t('readerCodeStyleDark'))}</option></select></label>
       <label class="ml-setting-row"><span>${escapeHtml(t('readerFont'))}</span><select data-testid="font-family"><option value="pretendard">Pretendard</option><option value="system">${escapeHtml(t('readerSystemFont'))}</option></select></label>
       <label class="ml-setting-slider"><span>${escapeHtml(t('readerFontSize'))} <output data-testid="font-size-value" for="ml-font-size">17px</output></span><input id="ml-font-size" data-testid="font-size" type="range" min="13" max="28" step="1"></label>
       <label class="ml-setting-slider"><span>${escapeHtml(t('readerLineSpacing'))} <output data-testid="line-height-value" for="ml-line-height">1.80</output></span><input id="ml-line-height" data-testid="line-height" type="range" min="1.4" max="3" step="0.01"></label>
@@ -289,10 +297,6 @@ app.innerHTML = `
       </fieldset>
       <label class="ml-setting-slider"><span>${escapeHtml(t('readerCustomWidth'))} <output data-testid="content-width-value" for="ml-content-width">920px</output></span><input id="ml-content-width" data-testid="content-width" type="range" min="560" max="1400" step="20"></label>
       <p class="ml-a4-note" data-testid="a4-note" hidden>${escapeHtml(t('readerA4PreviewNote'))}</p>
-      <div class="ml-shortcuts" aria-label="${escapeHtml(t('readerKeyboardShortcuts'))}">
-        <span><kbd>Alt</kbd><kbd>R</kbd> ${escapeHtml(t('readerRefresh'))}</span>
-        <span><kbd>Alt</kbd><kbd>T</kbd> ${escapeHtml(t('readerTheme'))}</span>
-      </div>
     </details>
     <div class="ml-settings-footer">
       <button data-release-notes type="button">${readerIcon('recent')}<span>${escapeHtml(t('releaseNotesLink'))}</span></button>
@@ -323,10 +327,9 @@ const fileTree = app.querySelector<HTMLElement>('.ml-tree')!
 const toc = app.querySelector<HTMLElement>('.ml-toc')!
 const rootName = app.querySelector<HTMLElement>('.ml-root-name')!
 const searchInput = app.querySelector<HTMLInputElement>('[data-testid="document-search"]')!
-const refreshEnabled = app.querySelector<HTMLInputElement>('[data-testid="refresh-enabled"]')!
-const refreshInterval = app.querySelector<HTMLInputElement>('[data-testid="refresh-interval"]')!
-const themeButtons = [...app.querySelectorAll<HTMLButtonElement>('[data-theme]')]
 const fontFamily = app.querySelector<HTMLSelectElement>('[data-testid="font-family"]')!
+const codeStyle = app.querySelector<HTMLSelectElement>('[data-testid="code-style"]')!
+const themeButtons = [...app.querySelectorAll<HTMLButtonElement>('[data-theme]')]
 const fontSize = app.querySelector<HTMLInputElement>('[data-testid="font-size"]')!
 const fontSizeValue = app.querySelector<HTMLOutputElement>('[data-testid="font-size-value"]')!
 const lineHeight = app.querySelector<HTMLInputElement>('[data-testid="line-height"]')!
@@ -2351,7 +2354,6 @@ function restartRefreshTimer() {
   if (refreshTimer !== undefined) window.clearInterval(refreshTimer)
   refreshTimer = undefined
   settings.refreshIntervalMs = clampRefreshInterval(settings.refreshIntervalMs)
-  refreshInterval.value = String(settings.refreshIntervalMs / 1000)
   if (activeDocument && !activeDocument.refreshSuspended && documentReady && pageActive && !extensionInvalidated && settings.refreshEnabled && !document.hidden) {
     const generation = refreshGeneration
     const owner = activeDocument
@@ -2396,15 +2398,14 @@ window.addEventListener('pageshow', () => {
 function applySettings(restartTimer = true) {
   applySidebar()
   document.documentElement.dataset.mlTheme = settings.colorMode
+  for (const button of themeButtons) button.setAttribute('aria-pressed', String(button.dataset.theme === settings.colorMode))
+  document.documentElement.dataset.mlCodeStyle = settings.codeStyle
+  codeStyle.value = settings.codeStyle
   document.documentElement.dataset.mlFontFamily = settings.fontFamily
   document.documentElement.style.setProperty('--ml-font-size', `${settings.fontSizePx}px`)
   document.documentElement.style.setProperty('--ml-line-height', settings.lineHeight.toFixed(2))
   document.documentElement.style.setProperty('--ml-content-width', `${settings.contentWidthPx}px`)
   content.dataset.widthMode = settings.widthMode
-  refreshEnabled.checked = settings.refreshEnabled
-  refreshInterval.disabled = !settings.refreshEnabled
-  refreshInterval.value = String(settings.refreshIntervalMs / 1000)
-  for (const button of themeButtons) button.setAttribute('aria-pressed', String(button.dataset.theme === settings.colorMode))
   fontFamily.value = settings.fontFamily
   fontSize.value = String(settings.fontSizePx)
   fontSizeValue.value = `${settings.fontSizePx}px`
@@ -2483,24 +2484,19 @@ app.querySelectorAll<HTMLButtonElement>('[data-search-step]').forEach((button) =
   button.addEventListener('click', () => moveSearch(Number(button.dataset.searchStep)))
 })
 app.querySelector('[data-testid="search-clear"]')!.addEventListener('click', closeSearch)
-refreshEnabled.addEventListener('change', () => {
-  saveSetting('refreshEnabled', refreshEnabled.checked)
+fontFamily.addEventListener('change', () => {
+  saveSetting('fontFamily', fontFamily.value as FontFamily)
   applySettings()
 })
-refreshInterval.addEventListener('change', () => {
-  const value = clampRefreshInterval(Number(refreshInterval.value) * 1000)
-  saveSetting('refreshIntervalMs', value)
-  restartRefreshTimer()
+codeStyle.addEventListener('change', () => {
+  saveSetting('codeStyle', codeStyle.value === 'light' ? 'light' : 'dark')
+  document.documentElement.dataset.mlCodeStyle = settings.codeStyle
 })
 themeButtons.forEach((button) => {
   button.addEventListener('click', () => {
     saveSetting('colorMode', button.dataset.theme as Theme)
     applySettings()
   })
-})
-fontFamily.addEventListener('change', () => {
-  saveSetting('fontFamily', fontFamily.value as FontFamily)
-  applySettings()
 })
 fontSize.addEventListener('input', () => {
   saveSetting('fontSizePx', Number(fontSize.value))
@@ -2564,6 +2560,7 @@ async function start() {
   settings = { ...defaults, ...await (startupSettings || chrome.storage.local.get(defaults)) }
   settings.refreshIntervalMs = clampRefreshInterval(settings.refreshIntervalMs)
   settings.fontFamily = settings.fontFamily === 'pretendard' ? 'pretendard' : 'system'
+  settings.codeStyle = settings.codeStyle === 'light' ? 'light' : 'dark'
   settings.lineHeight = Math.min(3, Math.max(1.4, Number(settings.lineHeight) || defaults.lineHeight))
   const readingSettings = app.querySelector<HTMLDetailsElement>('.ml-settings')!
   readingSettings.open = settings.readingSettingsOpen !== false

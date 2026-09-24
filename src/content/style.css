@@ -121,14 +121,11 @@ body.markdown-leader { margin: 0; color: var(--ml-text); background: var(--ml-bg
 .ml-setting-slider input { width: 100%; margin: 0; accent-color: var(--ml-accent); }
 .ml-settings input:disabled { cursor: not-allowed; opacity: .45; }
 .ml-a4-note { margin: 7px 0 0; color: var(--ml-muted); font-size: 11px; line-height: 1.45; }
-.ml-shortcuts { display: grid; gap: 5px; margin-top: 10px; border-top: 1px solid var(--ml-border); padding-top: 10px; color: var(--ml-muted); font-size: 11px; }
 .ml-settings-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 14px; margin: 12px 14px 0; }
 .ml-settings-footer :is(a, button) { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; color: var(--ml-accent-strong); background: transparent; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
 .ml-settings-footer svg { width: 16px; height: 16px; flex: 0 0 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .ml-settings-footer :is(a, button):hover { text-decoration: underline; }
 .ml-settings-footer :is(a, button):focus-visible { outline: 2px solid var(--ml-focus-ring); outline-offset: 2px; border-radius: 4px; }
-.ml-shortcuts span { display: flex; align-items: center; gap: 3px; }
-.ml-shortcuts kbd { min-width: 19px; padding: 1px 4px; border: 1px solid var(--ml-border); border-bottom-width: 2px; border-radius: 4px; color: var(--ml-text); background: var(--ml-bg); font: 10px/1.4 var(--ml-font-family); text-align: center; }
 input:is([type="search"], [type="number"]):focus-visible, select:focus-visible { outline: none; border-color: var(--ml-accent); }
 button:focus-visible, summary:focus-visible, a:focus-visible, input[type="range"]:focus-visible { outline: 2px solid var(--ml-focus-ring); outline-offset: 2px; border-radius: 6px; }
 input[type="checkbox"]:focus-visible { outline: 2px solid var(--ml-focus-ring); outline-offset: 2px; }
@@ -193,6 +190,27 @@ input[type="checkbox"]:focus-visible { outline: 2px solid var(--ml-focus-ring); 
 .ml-document code { padding: .15em .35em; border-radius: 4px; background: var(--ml-inline-code-bg); font: .9em/1.5 Consolas, Menlo, Monaco, var(--ml-font-family), monospace; }
 .ml-document pre { position: relative; overflow: auto; padding: 18px; border-radius: 9px; color: #e6edf3; background: var(--ml-code); }
 .ml-document pre code { padding: 0; background: transparent; }
+.ml-code-style-setting > span { white-space: nowrap; }
+.ml-code-style-setting { grid-template-columns: auto minmax(0, 1fr); }
+.ml-settings .ml-code-style-setting select { width: 100%; max-width: 120px; justify-self: end; }
+/* GitHub 밝은 문법 팔레트. 코드 영역만 바꾸고 인라인 코드와 페이지 테마는 유지한다. */
+:root[data-ml-code-style="light"] .ml-document pre {
+  color-scheme: light; color: #24292e; background: #fff; box-shadow: inset 0 0 0 1px #dfe3e8;
+}
+:root[data-ml-code-style="light"] .ml-document pre code { color: #24292e; background: transparent; }
+:root[data-ml-code-style="light"] .ml-document pre :is(.hljs-doctag, .hljs-keyword, .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-variable.language_) { color: #d73a49; }
+:root[data-ml-code-style="light"] .ml-document pre .hljs-title { color: #6f42c1; }
+:root[data-ml-code-style="light"] .ml-document pre :is(.hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator, .hljs-variable, .hljs-selector-attr, .hljs-selector-class, .hljs-selector-id) { color: #005cc5; }
+:root[data-ml-code-style="light"] .ml-document pre :is(.hljs-regexp, .hljs-string) { color: #032f62; }
+:root[data-ml-code-style="light"] .ml-document pre :is(.hljs-built_in, .hljs-symbol) { color: #953800; }
+:root[data-ml-code-style="light"] .ml-document pre :is(.hljs-comment, .hljs-code, .hljs-formula) { color: #57606a; }
+:root[data-ml-code-style="light"] .ml-document pre :is(.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo) { color: #22863a; }
+:root[data-ml-code-style="light"] .ml-document pre :is(.hljs-subst, .hljs-emphasis, .hljs-strong) { color: #24292e; }
+:root[data-ml-code-style="light"] .ml-document pre .hljs-section { color: #005cc5; }
+:root[data-ml-code-style="light"] .ml-document pre .hljs-bullet { color: #735c0f; }
+:root[data-ml-code-style="light"] .ml-document pre .hljs-addition { color: #22863a; background-color: #f0fff4; }
+:root[data-ml-code-style="light"] .ml-document pre .hljs-deletion { color: #b31d28; background-color: #ffeef0; }
+:root[data-ml-code-style="light"] .ml-document .ml-copy { color: #24292e; background: #fff; border-color: #dfe3e8; }
 .ml-copy { position: absolute; top: 8px; right: 8px; border: 1px solid #ffffff33; border-radius: 5px; padding: 4px 7px; color: #e6edf3; background: #0d1117cc; font-weight: 600; cursor: pointer; }
 .task-list-item { list-style: none; }
 .task-list-item input { margin-left: -1.4em; pointer-events: none; }
@@ -212,17 +230,17 @@ input[type="checkbox"]:focus-visible { outline: 2px solid var(--ml-focus-ring); 
 .ml-setting-row select { width: 144px; max-width: 100%; min-width: 0; min-height: 32px; padding: 6px 10px; color: var(--ml-text); background: var(--ml-surface); border: 1px solid var(--ml-border); border-radius: 8px; font: inherit; cursor: pointer; }
 .ml-setting-row select:disabled { opacity: .45; cursor: not-allowed; }
 @supports (appearance: base-select) {
-  .ml-setting-row select, .ml-setting-row select::picker(select) { appearance: base-select; }
-  .ml-setting-row select { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .ml-setting-row select:not(:disabled):hover, .ml-setting-row select:open { border-color: var(--ml-accent); }
-  .ml-setting-row select::picker(select) { min-width: anchor-size(width); margin-top: 4px; padding: 4px; color: var(--ml-text); background: var(--ml-surface); border: 1px solid var(--ml-border); border-radius: 10px; box-shadow: 0 8px 24px #0002; font: 13px/1.4 var(--ml-font-family); }
-  .ml-setting-row select::picker-icon { content: ""; width: 8px; height: 8px; margin: -4px 2px 0 4px; color: var(--ml-muted); border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); }
-  .ml-setting-row select:open::picker-icon { margin-top: 4px; color: var(--ml-accent); transform: rotate(225deg); }
-  .ml-setting-row select option { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 6px 10px; border-radius: 6px; color: var(--ml-text); cursor: pointer; }
-  .ml-setting-row select option:hover, .ml-setting-row select option:focus { background: var(--ml-hover); }
-  .ml-setting-row select option:checked { color: var(--ml-accent-strong); background: var(--ml-hover); font-weight: 600; }
-  .ml-setting-row select option:focus-visible { outline: 2px solid var(--ml-focus-ring); outline-offset: -2px; }
-  .ml-setting-row select option::checkmark { order: 1; margin-left: auto; color: var(--ml-accent); }
+  :is(.ml-setting-row, .ml-pdf-code-style) select, :is(.ml-setting-row, .ml-pdf-code-style) select::picker(select) { appearance: base-select; }
+  :is(.ml-setting-row, .ml-pdf-code-style) select { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  :is(.ml-setting-row, .ml-pdf-code-style) select:not(:disabled):hover, :is(.ml-setting-row, .ml-pdf-code-style) select:open { border-color: var(--ml-accent); }
+  :is(.ml-setting-row, .ml-pdf-code-style) select::picker(select) { min-width: anchor-size(width); margin-top: 4px; padding: 4px; color: var(--ml-text); background: var(--ml-surface); border: 1px solid var(--ml-border); border-radius: 10px; box-shadow: 0 8px 24px #0002; font: 13px/1.4 var(--ml-font-family); }
+  :is(.ml-setting-row, .ml-pdf-code-style) select::picker-icon { content: ""; width: 8px; height: 8px; margin: -4px 2px 0 4px; color: var(--ml-muted); border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); }
+  :is(.ml-setting-row, .ml-pdf-code-style) select:open::picker-icon { margin-top: 4px; color: var(--ml-accent); transform: rotate(225deg); }
+  :is(.ml-setting-row, .ml-pdf-code-style) select option { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 6px 10px; border-radius: 6px; color: var(--ml-text); cursor: pointer; }
+  :is(.ml-setting-row, .ml-pdf-code-style) select option:hover, :is(.ml-setting-row, .ml-pdf-code-style) select option:focus { background: var(--ml-hover); }
+  :is(.ml-setting-row, .ml-pdf-code-style) select option:checked { color: var(--ml-accent-strong); background: var(--ml-hover); font-weight: 600; }
+  :is(.ml-setting-row, .ml-pdf-code-style) select option:focus-visible { outline: 2px solid var(--ml-focus-ring); outline-offset: -2px; }
+  :is(.ml-setting-row, .ml-pdf-code-style) select option::checkmark { order: 1; margin-left: auto; color: var(--ml-accent); }
 }
 
 .ml-ribbon { grid-column: 1; grid-row: 1 / -1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 0; border-right: 1px solid var(--ml-border); background: var(--ml-bg); }

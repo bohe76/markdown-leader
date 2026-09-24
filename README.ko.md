@@ -61,7 +61,7 @@ Markdown Leader는 일반 Markdown 편집기가 아닙니다. 로컬 문서를 �
 
 ## 설치와 지원
 
-- 이 저장소는 1.4.1 소스 스냅샷입니다. [Chrome 웹스토어](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) 등록정보에서 현재 설치 가능한 버전을 확인할 수 있습니다.
+- 이 저장소는 1.5.0 소스 스냅샷입니다. [Chrome 웹스토어](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) 등록정보에서 현재 설치 가능한 버전을 확인할 수 있습니다.
 - [오류 제보](https://github.com/bohe76/markdown-leader/issues/new?template=bug_report.yml) 또는 [기능 제안](https://github.com/bohe76/markdown-leader/issues/new?template=feature_request.yml)을 남길 수 있습니다.
 - 보안 취약점은 [bohe76@gmail.com](mailto:bohe76@gmail.com?subject=Markdown%20Leader%20security%20report)으로 비공개 제보합니다. 공개 이슈에는 올리지 마세요.
 - 로컬 Markdown 파일을 직접 열기 전에 확장 상세 화면에서 **파일 URL에 대한 액세스 허용**을 켭니다.

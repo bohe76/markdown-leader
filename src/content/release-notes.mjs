@@ -4,6 +4,15 @@ export const RELEASE_NOTES_KEYS = {
 }
 
 export const RELEASE_NOTES = {
+  '1.5.0': {
+    summary: 'releaseNotes150Summary',
+    items: [
+      'releaseNotes150ConvertedTables',
+      'releaseNotes150Html',
+      'releaseNotes150CodeStyle',
+      'releaseNotes150Settings',
+    ],
+  },
   '1.4.1': {
     summary: 'releaseNotes141Summary',
     items: [
