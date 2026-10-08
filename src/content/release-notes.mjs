@@ -4,17 +4,12 @@ export const RELEASE_NOTES_KEYS = {
 }
 
 export const RELEASE_NOTES = {
-  // 1.6.0은 심사를 취소해 공개되지 않았으므로 1.7.0에 1.6.0 항목을 함께 담는다.
   '1.7.0': {
     summary: 'releaseNotes170Summary',
     items: [
       'releaseNotes170Marks',
       'releaseNotes170Colors',
       'releaseNotes170Fonts',
-      'releaseNotes160ReviewLayout',
-      'releaseNotes160ReviewMarks',
-      'releaseNotes160Feedback',
-      'releaseNotes160Fixes',
     ],
   },
   '1.6.0': {
