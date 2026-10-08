@@ -87,6 +87,8 @@ return {
       copyFileSync(resolve(source, 'content/startup.css'), resolve(output, 'content/startup.css'))
       copyFileSync(resolve(source, 'popup.html'), resolve(output, 'popup.html'))
       copyFileSync(resolve(source, 'popup.js'), resolve(output, 'popup.js'))
+      // 팝업이 리더와 같은 강조색 규칙을 쓰도록 색 모듈을 그대로 둔다.
+      copyFileSync(resolve(source, 'content/reader-colors.mjs'), resolve(output, 'reader-colors.mjs'))
       copyFileSync(resolve(source, 'reader.html'), resolve(output, 'reader.html'))
       copyFileSync(resolve(root, 'LICENSE'), resolve(output, 'LICENSE'))
       writeFileSync(resolve(output, 'THIRD_PARTY_NOTICES.txt'), runtimeNotices())

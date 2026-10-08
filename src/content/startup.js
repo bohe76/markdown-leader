@@ -12,6 +12,7 @@
     return chrome.storage.local.get([
       'codeStyle',
       'refreshEnabled', 'refreshIntervalMs', 'colorMode', 'fontFamily', 'fontSizePx', 'lineHeight', 'contentWidthPx', 'widthMode', 'readingSettingsOpen', 'directorySort', 'sidebarWidthPx',
+      'highlightColor', 'accentColor', 'accentCustom',
     ])
   })()
   void settingsReady.catch(() => {})

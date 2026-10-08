@@ -4,7 +4,7 @@
 .ml-pdf-dialog {
   width: calc(100vw - 32px); max-width: 1100px; height: calc(100vh - 32px); max-height: none;
   padding: 0; border: 1px solid var(--ml-border); border-radius: 12px;
-  background: var(--ml-bg); color: var(--ml-text); font: 13px/1.4 var(--ml-font-family);
+  background: var(--ml-bg); color: var(--ml-text); font: 13px/1.4 var(--ml-ui-font-family);
 }
 .ml-pdf-dialog::backdrop { background: #0006; }
 .ml-pdf-dialog[open] { display: flex; flex-direction: column; }

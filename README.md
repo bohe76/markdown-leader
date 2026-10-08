@@ -36,14 +36,14 @@ Markdown Leader is not a general Markdown editor. Browse and search local docume
 
 ### Review without switching to a general editor
 
-- Change Markdown checklists and add contextual notes to selected text.
+- Change Markdown checklists, highlight or underline selected text, and add contextual notes to it.
 - Keep review notes in an HTML comment at the end of the original Markdown file, so they travel with the document.
 - Detect external changes before saving instead of silently overwriting another editor's work.
 
 ### Read technical Markdown
 
 - Render tables, highlighted code, relative images and links, footnotes, alerts, MathJax-based TeX/LaTeX math, and Mermaid diagrams.
-- Choose light, dark, or system theme; text size, line spacing, font, and reading width are local reading preferences.
+- Choose light, dark, or system theme; highlight and accent colors, text size, line spacing, font, and reading width are local reading preferences.
 - Use the same rendered document for A4 preview and Chrome's PDF print flow.
 
 ## Local-first privacy and permissions
@@ -61,7 +61,7 @@ Notes are intentionally stored with the Markdown source. Anyone who can access t
 
 ## Install and support
 
-- This repository contains the 1.6.0 source snapshot. The [Chrome Web Store](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) listing shows the currently available version.
+- This repository contains the 1.7.0 source snapshot. The [Chrome Web Store](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) listing shows the currently available version.
 - [Report a bug](https://github.com/bohe76/markdown-leader/issues/new?template=bug_report.yml) or [request a feature](https://github.com/bohe76/markdown-leader/issues/new?template=feature_request.yml).
 - Report security vulnerabilities privately at [bohe76@gmail.com](mailto:bohe76@gmail.com?subject=Markdown%20Leader%20security%20report). Do not post them in a public issue.
 - Enable **Allow access to file URLs** in the extension details before opening local Markdown files directly.

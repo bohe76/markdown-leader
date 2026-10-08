@@ -2,6 +2,50 @@
   "readerCodeStyle": { "message": "코드 스타일" },
   "readerCodeStyleLight": { "message": "밝게" },
   "readerCodeStyleDark": { "message": "어둡게" },
+  "selectionToolbar": { "message": "선택 도구" },
+  "markHighlight": { "message": "하이라이트" },
+  "markHighlightRemove": { "message": "하이라이트 해제" },
+  "markUnderline": { "message": "밑줄" },
+  "markUnderlineRemove": { "message": "밑줄 해제" },
+  "markUnsupported": { "message": "이 선택 범위에는 표시를 넣을 수 없습니다. 범위를 줄여 다시 선택하세요." },
+  "readerSettingsColorSection": { "message": "색상" },
+  "readerSettingsReadingSection": { "message": "읽기" },
+  "readerHighlightColor": { "message": "하이라이트" },
+  "readerAccentColor": { "message": "강조" },
+  "readerAccentLight": { "message": "밝은 테마" },
+  "readerAccentDark": { "message": "어두운 테마" },
+  "highlightYellow": { "message": "노랑" },
+  "highlightBrightGreen": { "message": "밝은 녹색" },
+  "highlightTurquoise": { "message": "청록" },
+  "highlightPink": { "message": "분홍" },
+  "highlightRed": { "message": "빨강" },
+  "highlightBlue": { "message": "파랑" },
+  "highlightDarkYellow": { "message": "진한 노랑" },
+  "highlightGreen": { "message": "녹색" },
+  "highlightTeal": { "message": "진청록" },
+  "highlightDarkBlue": { "message": "진한 파랑" },
+  "highlightViolet": { "message": "보라" },
+  "highlightDarkRed": { "message": "진한 빨강" },
+  "highlightGray25": { "message": "회색 25%" },
+  "highlightGray50": { "message": "회색 50%" },
+  "highlightBlack": { "message": "검정" },
+  "accentBlue": { "message": "파랑" },
+  "accentPurple": { "message": "자주" },
+  "accentGreen": { "message": "초록" },
+  "accentTeal": { "message": "청록" },
+  "accentOrange": { "message": "주황" },
+  "accentIndigo": { "message": "남색" },
+  "accentRed": { "message": "빨강" },
+  "accentAmber": { "message": "호박" },
+  "accentSlate": { "message": "회색" },
+  "accentViolet": { "message": "보라" },
+  "accentLime": { "message": "연두" },
+  "accentRose": { "message": "장미" },
+  "accentSky": { "message": "하늘" },
+  "accentEmerald": { "message": "에메랄드" },
+  "accentYellow": { "message": "노랑" },
+  "highlightOrange": { "message": "주황" },
+  "accentPink": { "message": "분홍" },
   "readerSortA": { "message": "이름순 · A → Z" },
   "readerSortZ": { "message": "이름순 · Z → A" },
   "readerSortN": { "message": "수정일순 · 최근 먼저" },
@@ -142,6 +186,36 @@
   },
   "readerSystemFont": {
     "message": "시스템 글꼴"
+  },
+  "fontMalgunGothic": {
+    "message": "맑은 고딕"
+  },
+  "fontSegoeUIVariable": {
+    "message": "Segoe UI Variable"
+  },
+  "fontGulim": {
+    "message": "굴림"
+  },
+  "fontDotum": {
+    "message": "돋움"
+  },
+  "fontBatang": {
+    "message": "바탕"
+  },
+  "fontGungsuh": {
+    "message": "궁서"
+  },
+  "fontAppleSDGothicNeo": {
+    "message": "Apple SD 산돌고딕 Neo"
+  },
+  "fontNanumGothic": {
+    "message": "나눔고딕"
+  },
+  "fontAppleMyungjo": {
+    "message": "애플명조"
+  },
+  "fontNanumMyeongjo": {
+    "message": "나눔명조"
   },
   "readerFontSize": {
     "message": "글자 크기"
@@ -536,6 +610,10 @@
   "pdfDocumentChanged": {"message": "준비 중 문서가 변경됐습니다. 현재 문서에서 PDF 출력을 다시 시작하세요."},
   "releaseNotesLink": {"message": "업데이트 내용"},
   "releaseNotesTitle": {"message": "v$VERSION$ 업데이트", "placeholders": {"version": {"content": "$1"}}},
+  "releaseNotes170Summary": {"message": "선택한 글자에 하이라이트·밑줄을 넣고, 메모가 문서를 가리지 않으며, 색과 글꼴을 더 고를 수 있습니다."},
+  "releaseNotes170Marks": {"message": "글자를 선택하면 나타나는 메뉴나 Alt+H·Alt+U로 하이라이트와 밑줄을 넣고 풀 수 있습니다. 원본 파일에 바로 저장됩니다."},
+  "releaseNotes170Colors": {"message": "설정에서 하이라이트 색 16가지와 강조색 16가지를 고르거나, 강조색을 밝은 테마·어두운 테마별로 직접 정할 수 있습니다."},
+  "releaseNotes170Fonts": {"message": "글꼴 메뉴에 운영체제 기본 글꼴이 추가되고, 고른 글꼴은 문서 본문에만 적용됩니다. 읽기 설정은 「읽기」와 「색상」으로 나눠 보여 줍니다."},
   "releaseNotes160Summary": {"message": "메모가 문서를 가리지 않고, 설정에서 바로 피드백을 보낼 수 있습니다."},
   "releaseNotes160Feedback": {"message": "설정의 피드백 보내기에서 한국어·영어 의견 양식을 열 수 있습니다. 앱 버전만 미리 입력하고 문서 내용은 보내지 않습니다."},
   "releaseNotes160ReviewLayout": {"message": "메모 패널을 열면 문서를 읽기 폭 그대로 옆으로 옮겨 겹치지 않게 합니다. 공간이 모자라면 탐색 패널을 잠시 접습니다."},
@@ -573,6 +651,8 @@
   "shortcutOpenFolder": {"message": "폴더 열기"},
   "shortcutSearch": {"message": "검색"},
   "shortcutNotes": {"message": "메모"},
+  "shortcutHighlight": {"message": "하이라이트"},
+  "shortcutUnderline": {"message": "밑줄"},
   "shortcutPdf": {"message": "PDF 미리보기"},
   "shortcutGuide": {"message": "Markdown Leader 안내"},
   "shortcutRefresh": {"message": "자동 새로고침"},

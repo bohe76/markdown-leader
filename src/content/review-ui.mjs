@@ -1,4 +1,6 @@
 import { parseReview } from './review-source.mjs'
+import { readerIcon } from './reader-icons.mjs'
+import { shortcutTurnsOn } from './selection-marks.mjs'
 
 // 중복 인용문은 문맥이 유일하게 일치할 때만 연결한다.
 export function locateReviewQuote(text, note) {
@@ -16,7 +18,10 @@ export function locateReviewQuote(text, note) {
   return contextual.length === 1 ? contextual[0] : -1
 }
 
-export function createReviewUI({ document, window, content, t, onSave }) {
+/**
+ * @param {{ document: any, window: any, content: any, t: (key: string) => string, onSave: (value: any) => Promise<string>, marks?: { describe: (range: any) => any, apply: (kind: 'mark' | 'ins', state: any, on: boolean) => Promise<void> } | null }} options
+ */
+export function createReviewUI({ document, window, content, t, onSave, marks = null }) {
   const element = document.createElement('div')
   element.className = 'ml-review-ui'
   const panel = document.createElement('aside')
@@ -34,7 +39,7 @@ export function createReviewUI({ document, window, content, t, onSave }) {
   const add = button('reviewAdd', () => {
     if (!selection || !current?.ready) return
     if (disconnectedDrafts.has(drafts.get(current.id))) {
-      add.hidden = true
+      toolbar.hidden = true
       panel.hidden = false
       renderPanel()
       list.querySelector('textarea')?.focus()
@@ -43,21 +48,44 @@ export function createReviewUI({ document, window, content, t, onSave }) {
     const draft = { ...selection, id: window.crypto.randomUUID(), text: '', createdAt: new Date().toISOString() }
     drafts.set(current.id, draft)
     draftOriginals.delete(current.id)
-    add.hidden = true
+    toolbar.hidden = true
     panel.hidden = false
     renderPanel()
     list.querySelector('textarea')?.focus()
   })
   add.className = 'ml-review-add'
-  add.hidden = true
+  withIcon(add, 'note')
+  // 표시 종류마다 적용·해제 항목을 따로 두고, 선택 상태에 맞는 항목만 보인다.
+  const markItems = [
+    ['mark', true, 'markHighlight', 'highlight'],
+    ['mark', false, 'markHighlightRemove', 'highlightOff'],
+    ['ins', true, 'markUnderline', 'underline'],
+    ['ins', false, 'markUnderlineRemove', 'underlineOff'],
+  ].map(([kind, on, key, icon]) => {
+    const node = withIcon(button(key, () => { void applyMark(kind, on) }), icon)
+    node.dataset.mark = kind
+    node.dataset.markAction = on ? 'add' : 'remove'
+    return { node, kind, on }
+  })
+  const divider = document.createElement('span')
+  divider.className = 'ml-selection-divider'
+  divider.setAttribute('aria-hidden', 'true')
+  const toolbar = document.createElement('div')
+  toolbar.className = 'ml-selection-toolbar'
+  toolbar.setAttribute('role', 'toolbar')
+  toolbar.setAttribute('aria-orientation', 'vertical')
+  toolbar.setAttribute('aria-label', t('selectionToolbar'))
+  toolbar.hidden = true
+  toolbar.append(...markItems.map(item => item.node), divider, add)
   // 포인터로 버튼을 눌러도 저장해 둔 선택 범위를 잃지 않는다.
-  add.addEventListener('pointerdown', event => event.preventDefault())
+  for (const node of [...markItems.map(item => item.node), add]) node.addEventListener('pointerdown', event => event.preventDefault())
   const markers = document.createElement('div')
   markers.className = 'ml-review-markers'
-  element.append(markers, add, panel)
+  element.append(markers, toolbar, panel)
   let current = null
   let notes = []
   let selection = null
+  let markState = null
   let selectionPointer = null
   let selectedId = null
   let anchors = []
@@ -74,6 +102,14 @@ export function createReviewUI({ document, window, content, t, onSave }) {
     node.type = 'button'
     node.textContent = t(key)
     node.addEventListener('click', handler)
+    return node
+  }
+
+  function withIcon(node, icon) {
+    const label = document.createElement('span')
+    label.textContent = node.textContent
+    node.innerHTML = readerIcon(icon)
+    node.append(label)
     return node
   }
 
@@ -119,13 +155,46 @@ export function createReviewUI({ document, window, content, t, onSave }) {
     return result
   }
 
+  // 표시가 없으면 적용, 모두 표시면 해제, 일부만 표시면 둘 다 보인다. 표시를 넣을 수 없는 선택이면 모두 숨긴다.
+  function updateMarkButtons(range) {
+    markState = null
+    try { markState = marks?.describe(range) || null } catch (error) { console.warn('[Markdown Leader] Selection marks unavailable', error) }
+    divider.hidden = !markState
+    for (const { node, kind, on } of markItems) node.hidden = !markState || markState[kind] === (on ? 'all' : 'none')
+  }
+
+  function selectedRange() {
+    const selected = window.getSelection()
+    if (!current?.ready || !selected?.rangeCount || selected.isCollapsed) return null
+    const range = selected.getRangeAt(0)
+    return content.contains(range.startContainer) && content.contains(range.endContainer) ? range : null
+  }
+
+  async function applyMark(kind, on) {
+    const state = markState
+    toolbar.hidden = true
+    if (!state || !current?.ready) return
+    markState = null
+    window.getSelection?.()?.removeAllRanges?.()
+    await marks.apply(kind, state, on)
+  }
+
+  // 단축키는 도구 모음이 보이지 않아도 현재 선택에 바로 적용한다.
+  function markSelection(kind) {
+    const range = selectedRange()
+    if (!range || !marks) return false
+    updateMarkButtons(range)
+    if (!markState) return false
+    void applyMark(kind, shortcutTurnsOn(markState, kind))
+    return true
+  }
+
   function updateSelection(point) {
-    add.hidden = true
+    toolbar.hidden = true
     selection = null
     const selected = window.getSelection()
-    if (!current?.ready || !selected?.rangeCount || selected.isCollapsed) return
-    const range = selected.getRangeAt(0)
-    if (!content.contains(range.startContainer) || !content.contains(range.endContainer)) return
+    const range = selectedRange()
+    if (!range) return
     const index = textIndex()
     const start = textOffset(index, range.startContainer, range.startOffset)
     const end = textOffset(index, range.endContainer, range.endOffset)
@@ -136,7 +205,8 @@ export function createReviewUI({ document, window, content, t, onSave }) {
       if (node.contains(range.startContainer) || (node.compareDocumentPosition(range.startContainer) & window.Node.DOCUMENT_POSITION_FOLLOWING)) heading = node.textContent || ''
     }
     selection = { quote, prefix: index.text.slice(Math.max(0, start - 64), start), suffix: index.text.slice(end, end + 64), heading }
-    add.hidden = false
+    updateMarkButtons(range)
+    toolbar.hidden = false
     let rect = range.getBoundingClientRect()
     if (!point && selected.focusNode) {
       const focus = document.createRange()
@@ -146,8 +216,13 @@ export function createReviewUI({ document, window, content, t, onSave }) {
     }
     const x = point ? point.clientX : rect.left
     const y = point ? point.clientY : rect.bottom
-    add.style.left = `${Math.max(44, Math.min(x - add.offsetWidth / 2, window.innerWidth - add.offsetWidth - 6))}px`
-    add.style.top = `${Math.max(4, Math.min(y + 6, window.innerHeight - add.offsetHeight - 6))}px`
+    // 메뉴는 포인터 오른쪽 아래에 두고, 화면이 모자라면 왼쪽·위로 뒤집는다.
+    const width = toolbar.offsetWidth
+    const height = toolbar.offsetHeight
+    const left = x + width > window.innerWidth - 6 ? x - width : x
+    const top = y + 6 + height > window.innerHeight - 6 ? y - 6 - height : y + 6
+    toolbar.style.left = `${Math.max(44, Math.min(left, window.innerWidth - width - 6))}px`
+    toolbar.style.top = `${Math.max(4, Math.min(top, window.innerHeight - height - 6))}px`
   }
 
   function rebuildAnchors() {
@@ -192,7 +267,7 @@ export function createReviewUI({ document, window, content, t, onSave }) {
     selectedId = selectedId === id ? null : id
     // 브라우저의 원래 텍스트 선택도 지워 토글 해제를 명확히 표시한다.
     window.getSelection?.()?.removeAllRanges?.()
-    add.hidden = true
+    toolbar.hidden = true
     if (selectedId && scroll) anchor.range.startContainer.parentElement?.scrollIntoView({ block: 'center', behavior: 'instant' })
     updateSelectedCards()
     positionMarkers()
@@ -266,7 +341,7 @@ export function createReviewUI({ document, window, content, t, onSave }) {
   }
 
   function schedulePosition() {
-    add.hidden = true
+    toolbar.hidden = true
     if (anchors.length && frame === null) frame = window.requestAnimationFrame(positionMarkers)
   }
 
@@ -429,7 +504,7 @@ export function createReviewUI({ document, window, content, t, onSave }) {
     selectionPointer = null
     selectedId = null
     error = ''
-    add.hidden = true
+    toolbar.hidden = true
     markers.replaceChildren()
     list.replaceChildren()
     if (frame !== null) window.cancelAnimationFrame(frame)
@@ -471,8 +546,8 @@ export function createReviewUI({ document, window, content, t, onSave }) {
   }
 
   document.addEventListener('pointerdown', event => {
-    if (add.contains(event.target)) return
-    add.hidden = true
+    if (toolbar.contains(event.target)) return
+    toolbar.hidden = true
     selectionPointer = event.button === 0 && content.contains(event.target) ? event.pointerId : null
   })
   document.addEventListener('pointerup', event => {
@@ -480,24 +555,24 @@ export function createReviewUI({ document, window, content, t, onSave }) {
     selectionPointer = null
     updateSelection(event)
   })
-  const dismissSelection = () => { selectionPointer = null; add.hidden = true }
+  const dismissSelection = () => { selectionPointer = null; toolbar.hidden = true }
   document.addEventListener('pointercancel', dismissSelection)
   window.addEventListener('blur', dismissSelection)
   window.addEventListener('wheel', dismissSelection, { passive: true, capture: true })
   document.addEventListener('selectionchange', () => {
-    if (window.getSelection()?.isCollapsed) { add.hidden = true; selection = null }
+    if (window.getSelection()?.isCollapsed) { toolbar.hidden = true; selection = null }
   })
   document.addEventListener('keyup', event => {
     if (selectionPointer === null && (event.key === 'Shift' || event.shiftKey || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a'))) updateSelection()
   })
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return
-    add.hidden = true
+    toolbar.hidden = true
     if (panel.contains(document.activeElement)) { hidePanel(); content.focus?.() }
   })
   window.addEventListener('scroll', schedulePosition, { passive: true })
   window.addEventListener('resize', schedulePosition, { passive: true })
   const layoutObserver = window.ResizeObserver ? new window.ResizeObserver(schedulePosition) : null
   layoutObserver?.observe(content)
-  return { element, clear, forget, invalidateDraft, setDocument, refreshAnchors, isOpen: () => !panel.hidden, toggle() { if (panel.hidden) { panel.hidden = false; renderPanel() } else hidePanel() } }
+  return { element, markSelection, clear, forget, invalidateDraft, setDocument, refreshAnchors, isOpen: () => !panel.hidden, toggle() { if (panel.hidden) { panel.hidden = false; renderPanel() } else hidePanel() } }
 }

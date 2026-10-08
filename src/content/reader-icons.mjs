@@ -10,6 +10,10 @@ const paths = {
   file: '<path d="M6 3h8l4 4v14H6V3Zm8 0v5h4M9 12h6m-6 4h6"/>',
   files: '<path d="M8 3h9v14H8zM5 7H3v14h10v-2"/>',
   toc: '<path d="M8 5h13M8 12h13M8 19h13M3 5h1M3 12h1M3 19h1"/>',
+  highlight: '<path d="m14 4 6 6-8 8H6v-6l8-8Z"/><path d="M4 21h16"/>',
+  highlightOff: '<path d="m14 4 6 6-8 8H6v-6l8-8Z"/><path d="M4 21h16M3 3l18 18"/>',
+  underline: '<path d="M7 4v6a5 5 0 0 0 10 0V4"/><path d="M5 20h14"/>',
+  underlineOff: '<path d="M7 4v6a5 5 0 0 0 10 0V4"/><path d="M5 20h14M3 3l18 18"/>',
   search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
   settings: '<path d="m10 3-.6 2.2-2 .9-2-.7-2 3.4 1.7 1.5v2.4L3.4 14l2 3.4 2-.7 2 .9L10 20h4l.6-2.4 2-.9 2 .7 2-3.4-1.7-1.3v-2.4l1.7-1.5-2-3.4-2 .7-2-.9L14 3Z"/><circle cx="12" cy="11.5" r="3"/>',
 }

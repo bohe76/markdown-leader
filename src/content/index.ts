@@ -13,7 +13,7 @@ import { feedbackFormURL } from './feedback-forms.mjs'
 import { createReleaseNotes } from './release-notes.mjs'
 import { createMarkdownGuide } from './markdown-guide.mjs'
 import reviewStyle from './review-ui.css?inline'
-import { parseReview, writeReview, patchTask, markdownReviewSource } from './review-source.mjs'
+import { parseReview, writeReview, patchTask } from './review-source.mjs'
 import { writeFileRevision } from './file-writer.mjs'
 import { createDocumentLoading } from './document-loading.mjs'
 import { createDocumentTabStrip } from './document-tabs.mjs'
@@ -22,19 +22,13 @@ import { readerIcon } from './reader-icons.mjs'
 import { normalizeDirectorySort, selectDirectorySort, sortDirectoryEntries } from './directory-sort.mjs'
 import { createHandleSource } from './handle-source.mjs'
 import { createDirectoryReader } from './directory-reader.mjs'
-import { markdownComments } from './markdown-comments.mjs'
 import { highlightMatches, searchableText } from './search'
-import { markdownStructure, populateDocumentToc } from './markdown-structure.mjs'
-import { markdownInline } from './markdown-inline.mjs'
-import { markdownHtml } from './markdown-html.mjs'
-import { markdownConvertedTables } from './markdown-converted-tables.mjs'
-import { markdownAlerts } from './markdown-alerts.mjs'
-import { markdownFootnotes } from './markdown-footnotes.mjs'
-import definitions from 'markdown-it-deflist'
-import { clearMath, markdownMath, renderMath } from './markdown-math.mjs'
-import { markdownDiagrams, renderDiagrams } from './markdown-diagrams.mjs'
+import { populateDocumentToc } from './markdown-structure.mjs'
+import { clearMath, renderMath } from './markdown-math.mjs'
+import { renderDiagrams } from './markdown-diagrams.mjs'
 import { probeDirectoryDocuments } from './directory-documents.mjs'
 import { createTranslator } from '../i18n.mjs'
+import { detectPlatform, fontInstalled, fontStack, isFontId, osFonts } from './reader-fonts.mjs'
 import hljs from 'highlight.js/lib/core'
 import bash from 'highlight.js/lib/languages/bash'
 import csharp from 'highlight.js/lib/languages/csharp'
@@ -50,8 +44,11 @@ import sql from 'highlight.js/lib/languages/sql'
 import typescript from 'highlight.js/lib/languages/typescript'
 import xml from 'highlight.js/lib/languages/xml'
 import yaml from 'highlight.js/lib/languages/yaml'
-import MarkdownIt from 'markdown-it'
-import taskLists from 'markdown-it-task-lists'
+import type { MarkdownIt } from 'markdown-it'
+import { createMarkdown } from './markdown-pipeline.mjs'
+import { markdownSourcePositions } from './inline-marks.mjs'
+import { applyMarks, describeMarks, inlineProjections, selectedBlocks } from './selection-marks.mjs'
+import { ACCENT_PRESETS, HIGHLIGHT_PRESETS, colorVariables, isColor, pickAccent } from './reader-colors.mjs'
 import highlightStyle from 'highlight.js/styles/github-dark.css?inline'
 import readerStyle from './style.css?inline'
 import logo from '../assets/logo.svg?raw'
@@ -89,7 +86,7 @@ pdfStyle.textContent = `${PDF_CONTENT_STYLE}\n${pdfOutputStyle}`
 document.head.append(pdfStyle)
 
 type Theme = 'light' | 'dark' | 'system'
-type FontFamily = 'pretendard' | 'system'
+type FontFamily = string
 type WidthMode = 'a4' | 'custom'
 interface Settings {
   directorySort: { mode: 'name' | 'modified'; name: 'A' | 'Z'; modified: 'N' | 'O' }
@@ -105,6 +102,9 @@ interface Settings {
   lineHeight: number
   contentWidthPx: number
   widthMode: WidthMode
+  highlightColor: string
+  accentColor: string
+  accentCustom: { light: string; dark: string } | null
 }
 interface Entry { name: string; url: string; type: 'directory' | 'file'; modifiedAt?: number }
 interface ReadResult { ok: boolean; text?: string; error?: string; errorName?: string; errorCode?: string }
@@ -123,6 +123,9 @@ const defaults: Settings = {
   lineHeight: 1.8,
   contentWidthPx: 920,
   widthMode: 'custom',
+  highlightColor: 'yellow',
+  accentColor: 'blue',
+  accentCustom: null,
 }
 
 const uiLanguage = (() => {
@@ -196,32 +199,23 @@ function escapeHtml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-const md = new MarkdownIt({
-  html: true,
-  linkify: true,
-  typographer: true,
+const md: MarkdownIt = createMarkdown({
+  t,
   highlight(code: string, language: string): string {
     if (language && hljs.getLanguage(language)) {
       return `<pre class="hljs"><code>${hljs.highlight(code, { language }).value}</code></pre>`
     }
     return `<pre class="hljs"><code>${escapeHtml(code)}</code></pre>`
   },
-}).use(markdownComments).use(taskLists, { enabled: false, label: true })
-  .use(markdownInline)
-  .use(markdownConvertedTables)
-  .use(markdownStructure, { tocLabel: t('readerOutline') })
-  .use(markdownAlerts, { t })
-  .use(markdownFootnotes, { t })
-  .use(definitions)
-  .use(markdownMath)
-  .use(markdownDiagrams)
-  .use(markdownReviewSource)
-  .use(markdownHtml, {
-    getBaseURL: () => currentFileURL,
-    getLocalImages: () => Boolean(handleSource),
-  })
+  getBaseURL: () => currentFileURL,
+  getLocalImages: () => Boolean(handleSource),
+})
 
 md.validateLink = (url: string) => resolveSafeURL(url, currentFileURL, 'link') !== null
+// 하이라이트·밑줄 원본 편집 전용 파서다. 화면 파서와 같은 문법·링크 판정을 쓰고 원본 위치만 추가로 기록한다.
+const markMd: MarkdownIt = markdownSourcePositions(createMarkdown({ t, getBaseURL: () => currentFileURL, getLocalImages: () => Boolean(handleSource) }))
+markMd.validateLink = md.validateLink
+let markProjections: { key: string; value: any[] } | null = null
 const defaultLinkOpen = md.renderer.rules.link_open || ((tokens: any[], index: number, options: any, _env: any, self: any) => self.renderToken(tokens, index, options))
 md.renderer.rules.link_open = (tokens, index, options, env, self) => {
   const hrefIndex = tokens[index].attrIndex('href')
@@ -280,15 +274,7 @@ app.innerHTML = `
     <div class="ml-panel ml-settings-panel" data-panel="settings">
     <details class="ml-settings">
       <summary><span>${escapeHtml(t('readerReadingSettings'))}</span><svg class="ml-settings-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></summary>
-      <fieldset class="ml-setting-group">
-        <legend>${escapeHtml(t('readerTheme'))}</legend>
-        <div class="ml-segmented" role="group" aria-label="${escapeHtml(t('readerTheme'))}">
-          <button data-testid="theme-light" data-theme="light" type="button" aria-pressed="false">${escapeHtml(t('readerThemeLight'))}</button>
-          <button data-testid="theme-dark" data-theme="dark" type="button" aria-pressed="false">${escapeHtml(t('readerThemeDark'))}</button>
-          <button data-testid="theme-system" data-theme="system" type="button" aria-pressed="false">${escapeHtml(t('readerThemeSystem'))}</button>
-        </div>
-      </fieldset>
-      <label class="ml-setting-row ml-code-style-setting"><span>${escapeHtml(t('readerCodeStyle'))}</span><select data-testid="code-style"><option value="light">${escapeHtml(t('readerCodeStyleLight'))}</option><option value="dark">${escapeHtml(t('readerCodeStyleDark'))}</option></select></label>
+      <h3 class="ml-settings-heading">${escapeHtml(t('readerSettingsReadingSection'))}</h3>
       <label class="ml-setting-row"><span>${escapeHtml(t('readerFont'))}</span><select data-testid="font-family"><option value="pretendard">Pretendard</option><option value="system">${escapeHtml(t('readerSystemFont'))}</option></select></label>
       <label class="ml-setting-slider"><span>${escapeHtml(t('readerFontSize'))} <output data-testid="font-size-value" for="ml-font-size">17px</output></span><input id="ml-font-size" data-testid="font-size" type="range" min="13" max="28" step="1"></label>
       <label class="ml-setting-slider"><span>${escapeHtml(t('readerLineSpacing'))} <output data-testid="line-height-value" for="ml-line-height">1.80</output></span><input id="ml-line-height" data-testid="line-height" type="range" min="1.4" max="3" step="0.01"></label>
@@ -301,6 +287,34 @@ app.innerHTML = `
       </fieldset>
       <label class="ml-setting-slider"><span>${escapeHtml(t('readerCustomWidth'))} <output data-testid="content-width-value" for="ml-content-width">920px</output></span><input id="ml-content-width" data-testid="content-width" type="range" min="560" max="1400" step="20"></label>
       <p class="ml-a4-note" data-testid="a4-note" hidden>${escapeHtml(t('readerA4PreviewNote'))}</p>
+      <h3 class="ml-settings-heading ml-settings-divided">${escapeHtml(t('readerSettingsColorSection'))}</h3>
+      <fieldset class="ml-setting-group">
+        <legend>${escapeHtml(t('readerTheme'))}</legend>
+        <div class="ml-segmented" role="group" aria-label="${escapeHtml(t('readerTheme'))}">
+          <button data-testid="theme-light" data-theme="light" type="button" aria-pressed="false">${escapeHtml(t('readerThemeLight'))}</button>
+          <button data-testid="theme-dark" data-theme="dark" type="button" aria-pressed="false">${escapeHtml(t('readerThemeDark'))}</button>
+          <button data-testid="theme-system" data-theme="system" type="button" aria-pressed="false">${escapeHtml(t('readerThemeSystem'))}</button>
+        </div>
+      </fieldset>
+      <fieldset class="ml-setting-group ml-color-setting">
+        <legend>${escapeHtml(t('readerHighlightColor'))}</legend>
+        <div class="ml-swatches" role="radiogroup" aria-label="${escapeHtml(t('readerHighlightColor'))}">${HIGHLIGHT_PRESETS.map(({ id, name, light, dark = light }) => `<button class="ml-swatch" type="button" role="radio" aria-checked="false" data-highlight-color="${id}" aria-label="${escapeHtml(t(name))}" data-tooltip="${escapeHtml(t(name))}" style="--ml-swatch-light: ${light[0]}; --ml-swatch-ink-light: ${light[1]}; --ml-swatch-dark: ${dark[0]}; --ml-swatch-ink-dark: ${dark[1]}"></button>`).join('')}</div>
+      </fieldset>
+      <fieldset class="ml-setting-group ml-color-setting">
+        <legend>${escapeHtml(t('readerAccentColor'))}</legend>
+        <div class="ml-swatches" role="radiogroup" aria-label="${escapeHtml(t('readerAccentColor'))}">${ACCENT_PRESETS.map(({ id, name, light, dark }) => `<button class="ml-swatch" type="button" role="radio" aria-checked="false" data-accent-color="${id}" aria-label="${escapeHtml(t(name))}" data-tooltip="${escapeHtml(t(name))}" style="--ml-swatch-light: ${light[1]}; --ml-swatch-ink-light: #ffffff; --ml-swatch-dark: ${dark[1]}; --ml-swatch-ink-dark: #11151b"></button>`).join('')}</div>
+        <div class="ml-accent-custom">
+          <label><input type="color" data-accent-custom="light"><span>${escapeHtml(t('readerAccentLight'))}</span></label>
+          <label><input type="color" data-accent-custom="dark"><span>${escapeHtml(t('readerAccentDark'))}</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="ml-setting-group">
+        <legend>${escapeHtml(t('readerCodeStyle'))}</legend>
+        <div class="ml-segmented ml-width-mode" role="group" data-testid="code-style" aria-label="${escapeHtml(t('readerCodeStyle'))}">
+          <button data-testid="code-style-light" data-code-style="light" type="button" aria-pressed="false">${escapeHtml(t('readerCodeStyleLight'))}</button>
+          <button data-testid="code-style-dark" data-code-style="dark" type="button" aria-pressed="false">${escapeHtml(t('readerCodeStyleDark'))}</button>
+        </div>
+      </fieldset>
     </details>
     <div class="ml-settings-footer">
       <button data-release-notes type="button">${readerIcon('recent')}<span>${escapeHtml(t('releaseNotesLink'))}</span></button>
@@ -333,7 +347,9 @@ const toc = app.querySelector<HTMLElement>('.ml-toc')!
 const rootName = app.querySelector<HTMLElement>('.ml-root-name')!
 const searchInput = app.querySelector<HTMLInputElement>('[data-testid="document-search"]')!
 const fontFamily = app.querySelector<HTMLSelectElement>('[data-testid="font-family"]')!
-const codeStyle = app.querySelector<HTMLSelectElement>('[data-testid="code-style"]')!
+// OS 글꼴 항목을 채우기 전에는 저장값을 그대로 쓰고, 채운 뒤에는 현재 기기에 없는 글꼴을 시스템 글꼴로 표시한다.
+let fontChoicesReady = false
+const codeStyleButtons = [...app.querySelectorAll<HTMLButtonElement>('[data-code-style]')]
 const themeButtons = [...app.querySelectorAll<HTMLButtonElement>('[data-theme]')]
 const fontSize = app.querySelector<HTMLInputElement>('[data-testid="font-size"]')!
 const fontSizeValue = app.querySelector<HTMLOutputElement>('[data-testid="font-size-value"]')!
@@ -343,6 +359,9 @@ const widthModeButtons = [...app.querySelectorAll<HTMLButtonElement>('[data-widt
 const contentWidth = app.querySelector<HTMLInputElement>('[data-testid="content-width"]')!
 const contentWidthValue = app.querySelector<HTMLOutputElement>('[data-testid="content-width-value"]')!
 const a4Note = app.querySelector<HTMLElement>('[data-testid="a4-note"]')!
+const highlightSwatches = [...app.querySelectorAll<HTMLButtonElement>('[data-highlight-color]')]
+const accentSwatches = [...app.querySelectorAll<HTMLButtonElement>('[data-accent-color]')]
+const accentInputs = [...app.querySelectorAll<HTMLInputElement>('[data-accent-custom]')]
 const sidebarResizer = createSidebarResizer({
   document, window, initialWidth: settings.sidebarWidthPx || defaults.sidebarWidthPx,
   onResize: (width: number) => {
@@ -394,7 +413,7 @@ window.addEventListener('pagehide', () => { releaseNotes.destroy(); markdownGuid
 const library = createReaderLibrary({ storage: chrome.storage.local, indexedDB, locks: storageLock, onChange: () => updateLibraryPanels() })
 const reviewUI = createReviewUI({ document, window, content, t, onSave: async ({ documentId, expectedRaw, notes }: any) => {
   return saveDocumentRevision(documentId, expectedRaw, writeReview(expectedRaw, notes))
-} })
+}, marks: { describe: describeSelectionMarks, apply: applySelectionMark } })
 app.append(reviewUI.element)
 const ratingRequest = createRatingRequest({
   document, window, storage: chrome.storage.local, lock: storageLock, t,
@@ -1024,6 +1043,42 @@ app.querySelector('[data-sidebar-toggle]')!.addEventListener('click', () => {
   applySidebar()
 })
 reviewToggle.addEventListener('click', () => reviewUI.toggle())
+
+// 화면에 렌더링한 본문(메모 영역과 BOM 제외)을 원본과 같은 기준으로 나눈다.
+function markSource(raw: string) {
+  let body: string
+  try { body = parseReview(raw).body } catch { return null }
+  const bom = body.startsWith('﻿') ? '﻿' : ''
+  return { bom, text: body.slice(bom.length), tail: raw.slice(body.length) }
+}
+
+function describeSelectionMarks(range: Range) {
+  if (!documentReady || !activeDocument || content.classList.contains('ml-paged-document')) return null
+  const raw = currentRaw
+  const source = markSource(raw)
+  if (!source) return null
+  const blocks = selectedBlocks(content, range, document)
+  if (!blocks.length) return null
+  // 링크 판정과 로컬 이미지 허용도 파싱 결과에 영향을 주므로 캐시 키에 함께 넣는다.
+  const key = `${currentFileURL}\n${Boolean(handleSource)}\n${raw}`
+  if (markProjections?.key !== key) markProjections = { key, value: inlineProjections(markMd, source.text) }
+  const state = describeMarks(markProjections.value, blocks)
+  return state && { ...state, raw, documentId: activeDocument.id }
+}
+
+async function applySelectionMark(kind: 'mark' | 'ins', state: any, on: boolean) {
+  const tab = activeDocument
+  if (!tab) return
+  try {
+    if (tab.id !== state.documentId || currentRaw !== state.raw) throw new Error(t('readerReviewStale'))
+    const source = markSource(state.raw)
+    if (!source) throw Object.assign(new Error('Invalid review source'), { code: 'review-invalid' })
+    const next = applyMarks(markMd, source.text, state, kind, on)
+    if (next !== source.text) await saveDocumentRevision(tab.id, state.raw, source.bom + next + source.tail)
+  } catch (error: any) {
+    if (activeDocument === tab) reportError(t('readerReviewSaveFailed'), tab.url, error?.code === 'mark-unsupported' ? new Error(t('markUnsupported')) : reviewError(error))
+  }
+}
 content.addEventListener('change', async event => {
   const input = event.target as HTMLInputElement
   if (!input.matches('input[data-task-line]') || !activeDocument) return
@@ -1377,6 +1432,8 @@ document.addEventListener('keydown', (event) => {
       k: () => { void chooseSource(true) },
       s: toggleSearch,
       m: () => reviewUI.toggle(),
+      h: () => { reviewUI.markSelection('mark') },
+      u: () => { reviewUI.markSelection('ins') },
       p: () => pdfOpen.click(),
       g: () => { markdownGuide.show() },
     }
@@ -2448,18 +2505,37 @@ window.addEventListener('pageshow', () => {
   if (!document.hidden) void resumeDirectoryMetadata()
 })
 
+// 하이라이트·강조색은 테마별 사용자 변수로 넣고, CSS가 현재 테마 값을 고른다.
+function applyColorSettings() {
+  const variables = colorVariables(settings)
+  for (const [name, value] of Object.entries(variables)) document.documentElement.style.setProperty(name, value)
+  const checkSwatches = (swatches: HTMLButtonElement[], selected: string | undefined) => {
+    for (const swatch of swatches) swatch.setAttribute('aria-checked', String(selected !== undefined && (swatch.dataset.highlightColor ?? swatch.dataset.accentColor) === selected))
+    const focusable = swatches.find(swatch => swatch.getAttribute('aria-checked') === 'true') || swatches[0]
+    for (const swatch of swatches) swatch.tabIndex = swatch === focusable ? 0 : -1
+  }
+  checkSwatches(highlightSwatches, HIGHLIGHT_PRESETS.find(item => item.id === settings.highlightColor)?.id || HIGHLIGHT_PRESETS[0].id)
+  const custom = settings.accentColor === 'custom' && isColor(settings.accentCustom?.light) && isColor(settings.accentCustom?.dark)
+  checkSwatches(accentSwatches, custom ? undefined : ACCENT_PRESETS.find(item => item.id === settings.accentColor)?.id || ACCENT_PRESETS[0].id)
+  for (const input of accentInputs) {
+    if (document.activeElement !== input) input.value = variables[`--ml-user-accent-strong-${input.dataset.accentCustom}` as keyof typeof variables]
+  }
+}
+
 function applySettings(restartTimer = true) {
   applySidebar()
   document.documentElement.dataset.mlTheme = settings.colorMode
   for (const button of themeButtons) button.setAttribute('aria-pressed', String(button.dataset.theme === settings.colorMode))
   document.documentElement.dataset.mlCodeStyle = settings.codeStyle
-  codeStyle.value = settings.codeStyle
-  document.documentElement.dataset.mlFontFamily = settings.fontFamily
+  for (const button of codeStyleButtons) button.setAttribute('aria-pressed', String(button.dataset.codeStyle === settings.codeStyle))
+  const font = !fontChoicesReady || [...fontFamily.options].some(option => option.value === settings.fontFamily) ? settings.fontFamily : 'system'
+  document.documentElement.dataset.mlFontFamily = font
+  document.documentElement.style.setProperty('--ml-font-family', fontStack(font))
   document.documentElement.style.setProperty('--ml-font-size', `${settings.fontSizePx}px`)
   document.documentElement.style.setProperty('--ml-line-height', settings.lineHeight.toFixed(2))
   document.documentElement.style.setProperty('--ml-content-width', `${settings.contentWidthPx}px`)
   content.dataset.widthMode = settings.widthMode
-  fontFamily.value = settings.fontFamily
+  fontFamily.value = font
   fontSize.value = String(settings.fontSizePx)
   fontSizeValue.value = `${settings.fontSizePx}px`
   lineHeight.value = settings.lineHeight.toFixed(2)
@@ -2468,7 +2544,13 @@ function applySettings(restartTimer = true) {
   contentWidth.value = String(settings.contentWidthPx)
   contentWidth.disabled = settings.widthMode === 'a4'
   contentWidthValue.value = `${settings.contentWidthPx}px`
+  // 슬라이더 트랙은 강조색과 무관하게 같은 회색 바탕에 채운 부분만 강조색으로 그린다.
+  for (const slider of [fontSize, lineHeight, contentWidth]) {
+    const min = Number(slider.min), max = Number(slider.max)
+    slider.style?.setProperty('--ml-range-fill', `${((Number(slider.value) - min) / (max - min || 1)) * 100}%`)
+  }
   a4Note.hidden = settings.widthMode !== 'a4'
+  applyColorSettings()
   if (!content.classList?.contains('ml-paged-document') && content.querySelectorAll) {
     content.querySelectorAll<HTMLTableElement>('table').forEach(fitTableWrapping)
   }
@@ -2516,6 +2598,49 @@ app.querySelectorAll<HTMLButtonElement>('[data-sort]').forEach((button) => {
   })
 })
 app.querySelector('[data-search-toggle]')!.addEventListener('click', toggleSearch)
+for (const swatches of [highlightSwatches, accentSwatches]) {
+  for (const swatch of swatches) {
+    swatch.addEventListener('click', () => {
+      if (swatch.dataset.highlightColor) saveSetting('highlightColor', swatch.dataset.highlightColor)
+      else saveSetting('accentColor', swatch.dataset.accentColor!)
+      applyColorSettings()
+    })
+    // 색 견본 묶음은 방향키로 이동하며 바로 선택한다.
+    swatch.addEventListener('keydown', event => {
+      const step = ({ ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 } as Record<string, number>)[event.key]
+      if (!step) return
+      event.preventDefault()
+      const next = swatches[(swatches.indexOf(swatch) + step + swatches.length) % swatches.length]
+      next.click()
+      next.focus()
+    })
+  }
+}
+// 프리셋에서 처음 고른 쪽을 기준으로 반대 테마 색을 채운다. 선택창을 change 없이 닫아도 화면과 저장값이 어긋나지 않게 바로 저장한다.
+let accentPickBase: Pick<Settings, 'accentColor' | 'accentCustom'> | null = null
+let accentSaveTimer: number | undefined
+function saveAccent() {
+  window.clearTimeout(accentSaveTimer)
+  accentSaveTimer = undefined
+  saveSetting('accentCustom', settings.accentCustom)
+  saveSetting('accentColor', settings.accentColor)
+}
+for (const input of accentInputs) {
+  input.addEventListener('input', () => {
+    accentPickBase ??= { accentColor: settings.accentColor, accentCustom: settings.accentCustom }
+    settings.accentCustom = pickAccent(accentPickBase, input.dataset.accentCustom as 'light' | 'dark', input.value)
+    settings.accentColor = 'custom'
+    applyColorSettings()
+    window.clearTimeout(accentSaveTimer)
+    accentSaveTimer = window.setTimeout(saveAccent, 400)
+  })
+  input.addEventListener('change', () => {
+    accentPickBase = null
+    saveAccent()
+    applyColorSettings()
+  })
+  input.addEventListener('blur', () => { accentPickBase = null })
+}
 searchInput.addEventListener('input', () => {
   window.clearTimeout(searchDebounce)
   searchGeneration++
@@ -2542,9 +2667,11 @@ fontFamily.addEventListener('change', () => {
   saveSetting('fontFamily', fontFamily.value as FontFamily)
   applySettings()
 })
-codeStyle.addEventListener('change', () => {
-  saveSetting('codeStyle', codeStyle.value === 'light' ? 'light' : 'dark')
-  document.documentElement.dataset.mlCodeStyle = settings.codeStyle
+codeStyleButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    saveSetting('codeStyle', button.dataset.codeStyle === 'light' ? 'light' : 'dark')
+    applySettings()
+  })
 })
 themeButtons.forEach((button) => {
   button.addEventListener('click', () => {
@@ -2605,6 +2732,13 @@ function scheduleInitialBackgroundWork() {
   })
 }
 
+async function addOSFontOptions() {
+  const fonts = osFonts(await detectPlatform(), (local: string) => fontInstalled(local))
+  fontFamily.append(...fonts.map(font => new Option(t(font.name), font.id)))
+  fontChoicesReady = true
+  applySettings(false)
+}
+
 async function start() {
   requireExtension()
   if (standaloneReader) readerTabId = (await chrome.tabs.getCurrent())?.id
@@ -2613,7 +2747,7 @@ async function start() {
   }).markdownLeaderSettingsReady
   settings = { ...defaults, ...await (startupSettings || chrome.storage.local.get(defaults)) }
   settings.refreshIntervalMs = clampRefreshInterval(settings.refreshIntervalMs)
-  settings.fontFamily = settings.fontFamily === 'pretendard' ? 'pretendard' : 'system'
+  settings.fontFamily = isFontId(settings.fontFamily) ? settings.fontFamily : 'system'
   settings.codeStyle = settings.codeStyle === 'light' ? 'light' : 'dark'
   settings.lineHeight = Math.min(3, Math.max(1.4, Number(settings.lineHeight) || defaults.lineHeight))
   const readingSettings = app.querySelector<HTMLDetailsElement>('.ml-settings')!
@@ -2624,6 +2758,7 @@ async function start() {
     }
   })
   applySettings(false)
+  void addOSFontOptions()
   rootName.textContent = rootDirectoryURL ? getFileName(rootDirectoryURL) || t('readerLocalFile') : t('readerLocalFile')
   rootName.title = rootDirectoryURL || t('readerLocalFile')
   updateNavigation()

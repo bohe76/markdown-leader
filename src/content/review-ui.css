@@ -1,4 +1,4 @@
-.ml-review-ui { font-family: var(--ml-font-family, sans-serif); color: var(--ml-text); font-size: 13px; }
+.ml-review-ui { font-family: var(--ml-ui-font-family, sans-serif); color: var(--ml-text); font-size: 13px; }
 .ml-review-ui [hidden] { display: none !important; }
 .ml-review-panel { position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: var(--ml-review-panel-width); background: var(--ml-surface); border-left: 1px solid var(--ml-border); box-shadow: -3px 0 12px #00000012; display: flex; flex-direction: column; }
 .ml-review-panel header { display: flex; align-items: center; justify-content: space-between; min-height: 58px; padding: 12px; border-bottom: 1px solid var(--ml-border); }
@@ -12,22 +12,27 @@
 .ml-review-card-label { display: flex; align-items: center; gap: 8px; min-width: 0; margin-bottom: 10px; }
 .ml-review-card blockquote { flex: 1; min-width: 0; margin: 0; padding-left: 8px; border-left: 2px solid var(--ml-border); font-size: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .ml-review-number { flex: 0 0 22px; height: 22px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; background: var(--ml-muted); color: var(--ml-surface); font-size: 12px; font-weight: 600; }
-.ml-review-card.is-selected .ml-review-number { background: var(--ml-accent-strong); }
+.ml-review-card.is-selected .ml-review-number { background: var(--ml-accent-strong); color: var(--ml-on-accent); }
 .ml-review-card:focus-visible { outline: 2px solid var(--ml-focus-ring); outline-offset: 2px; }
 .ml-review-unlocated-heading { font-size: 12px; color: var(--ml-muted); margin: 16px 0 12px; }
 .ml-review-card p { white-space: pre-wrap; overflow-wrap: anywhere; }
 .ml-review-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
 .ml-review-card textarea { width: 100%; box-sizing: border-box; resize: vertical; background: var(--ml-surface); color: var(--ml-text); border: 1px solid var(--ml-border); border-radius: 6px; padding: 8px; font: inherit; }
 .ml-review-card textarea:focus { outline: none; border-color: var(--ml-accent); }
-.ml-review-add { position: fixed; z-index: 32; box-shadow: 0 2px 8px #00000018; }
-.ml-review-ui .ml-review-add, .ml-review-ui .ml-review-add:hover { background: #000; color: #fff; border-color: #000; }
-:root[data-ml-theme="dark"] .ml-review-ui .ml-review-add { background: #fff; color: #000; border-color: #fff; }
+/* 선택 메뉴는 화면 테마와 반대 테마의 토큰으로 그려 본문 위에서 구분한다. */
+.ml-selection-toolbar { --ml-menu-surface: #171c24; --ml-menu-text: #e8edf5; --ml-menu-border: #2b3441; --ml-menu-hover: var(--ml-user-hover-dark, #202a3a); --ml-menu-focus: var(--ml-user-focus-ring-dark, #9cb7e8); position: fixed; z-index: 32; display: flex; flex-direction: column; width: max-content; padding: 4px; border: 1px solid var(--ml-menu-border); border-radius: 10px; background: var(--ml-menu-surface); color: var(--ml-menu-text); box-shadow: 0 8px 24px #0003; }
+:root[data-ml-theme="dark"] .ml-selection-toolbar { --ml-menu-surface: #ffffff; --ml-menu-text: #20242c; --ml-menu-border: #dfe3e8; --ml-menu-hover: var(--ml-user-hover-light, #eff4ff); --ml-menu-focus: var(--ml-user-focus-ring-light, #6c8ccb); }
 @media (prefers-color-scheme: dark) {
-  :root[data-ml-theme="system"] .ml-review-ui .ml-review-add { background: #fff; color: #000; border-color: #fff; }
+  :root[data-ml-theme="system"] .ml-selection-toolbar { --ml-menu-surface: #ffffff; --ml-menu-text: #20242c; --ml-menu-border: #dfe3e8; --ml-menu-hover: var(--ml-user-hover-light, #eff4ff); --ml-menu-focus: var(--ml-user-focus-ring-light, #6c8ccb); }
 }
+.ml-review-ui .ml-selection-toolbar button { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: inherit; font-weight: 400; text-align: left; white-space: nowrap; }
+.ml-review-ui .ml-selection-toolbar button:hover { background: var(--ml-menu-hover); }
+.ml-review-ui .ml-selection-toolbar button:focus-visible { outline-color: var(--ml-menu-focus); }
+.ml-selection-toolbar svg { flex: 0 0 16px; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ml-selection-divider { height: 1px; margin: 4px 0; background: var(--ml-menu-border); }
 .ml-review-ui .ml-review-marker { position: fixed; z-index: 15; width: 22px; height: 22px; padding: 0; border-radius: 50%; border: 0; background: var(--ml-muted); color: var(--ml-surface); font-size: 12px; font-weight: 600; }
 .ml-review-ui .ml-review-marker:hover { background: var(--ml-text); color: var(--ml-surface); }
-.ml-review-ui .ml-review-marker.is-selected { background: var(--ml-accent-strong); color: var(--ml-surface); outline: 2px solid var(--ml-focus-ring); outline-offset: 2px; }
+.ml-review-ui .ml-review-marker.is-selected { background: var(--ml-accent-strong); color: var(--ml-on-accent); outline: 2px solid var(--ml-focus-ring); outline-offset: 2px; }
 .ml-review-highlight { pointer-events: none; }
 .ml-review-highlight span { position: fixed; z-index: 1; outline: 1px solid var(--ml-focus-ring); background: color-mix(in srgb, var(--ml-accent) 20%, transparent); }
 @media print { .ml-review-ui { display: none !important; } }

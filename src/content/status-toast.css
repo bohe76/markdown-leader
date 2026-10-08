@@ -16,7 +16,7 @@
   background: var(--ml-surface);
   color: var(--ml-text);
   box-shadow: 0 8px 24px #0002;
-  font: 13px/1.4 var(--ml-font-family, system-ui, sans-serif);
+  font: 13px/1.4 var(--ml-ui-font-family, system-ui, sans-serif);
 }
 .ml-status.ml-toast[hidden] { display: none; }
 .ml-toast.error::before { content: '!'; color: var(--ml-error); font-weight: 700; }
@@ -29,7 +29,7 @@
   border-radius: 6px;
   background: var(--ml-surface);
   color: var(--ml-text);
-  font: 600 13px/1.4 var(--ml-font-family, system-ui, sans-serif);
+  font: 600 13px/1.4 var(--ml-ui-font-family, system-ui, sans-serif);
   cursor: pointer;
 }
 .ml-toast button:hover { background: var(--ml-hover); }

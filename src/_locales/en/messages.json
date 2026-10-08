@@ -2,6 +2,50 @@
   "readerCodeStyle": { "message": "Code style" },
   "readerCodeStyleLight": { "message": "Light" },
   "readerCodeStyleDark": { "message": "Dark" },
+  "selectionToolbar": { "message": "Selection tools" },
+  "markHighlight": { "message": "Highlight" },
+  "markHighlightRemove": { "message": "Remove highlight" },
+  "markUnderline": { "message": "Underline" },
+  "markUnderlineRemove": { "message": "Remove underline" },
+  "markUnsupported": { "message": "Can't apply the mark to this selection. Select a smaller range and try again." },
+  "readerSettingsColorSection": { "message": "Color" },
+  "readerSettingsReadingSection": { "message": "Reading" },
+  "readerHighlightColor": { "message": "Highlight" },
+  "readerAccentColor": { "message": "Accent" },
+  "readerAccentLight": { "message": "Light theme" },
+  "readerAccentDark": { "message": "Dark theme" },
+  "highlightYellow": { "message": "Yellow" },
+  "highlightBrightGreen": { "message": "Bright green" },
+  "highlightTurquoise": { "message": "Turquoise" },
+  "highlightPink": { "message": "Pink" },
+  "highlightRed": { "message": "Red" },
+  "highlightBlue": { "message": "Blue" },
+  "highlightDarkYellow": { "message": "Dark yellow" },
+  "highlightGreen": { "message": "Green" },
+  "highlightTeal": { "message": "Teal" },
+  "highlightDarkBlue": { "message": "Dark blue" },
+  "highlightViolet": { "message": "Violet" },
+  "highlightDarkRed": { "message": "Dark red" },
+  "highlightGray25": { "message": "Gray 25%" },
+  "highlightGray50": { "message": "Gray 50%" },
+  "highlightBlack": { "message": "Black" },
+  "accentBlue": { "message": "Blue" },
+  "accentPurple": { "message": "Purple" },
+  "accentGreen": { "message": "Green" },
+  "accentTeal": { "message": "Teal" },
+  "accentOrange": { "message": "Orange" },
+  "accentIndigo": { "message": "Indigo" },
+  "accentRed": { "message": "Red" },
+  "accentAmber": { "message": "Amber" },
+  "accentSlate": { "message": "Slate" },
+  "accentViolet": { "message": "Violet" },
+  "accentLime": { "message": "Lime" },
+  "accentRose": { "message": "Rose" },
+  "accentSky": { "message": "Sky" },
+  "accentEmerald": { "message": "Emerald" },
+  "accentYellow": { "message": "Yellow" },
+  "highlightOrange": { "message": "Orange" },
+  "accentPink": { "message": "Pink" },
   "readerSortA": { "message": "Name · A to Z" },
   "readerSortZ": { "message": "Name · Z to A" },
   "readerSortN": { "message": "Modified · Newest first" },
@@ -142,6 +186,36 @@
   },
   "readerSystemFont": {
     "message": "System font"
+  },
+  "fontMalgunGothic": {
+    "message": "Malgun Gothic"
+  },
+  "fontSegoeUIVariable": {
+    "message": "Segoe UI Variable"
+  },
+  "fontGulim": {
+    "message": "Gulim"
+  },
+  "fontDotum": {
+    "message": "Dotum"
+  },
+  "fontBatang": {
+    "message": "Batang"
+  },
+  "fontGungsuh": {
+    "message": "Gungsuh"
+  },
+  "fontAppleSDGothicNeo": {
+    "message": "Apple SD Gothic Neo"
+  },
+  "fontNanumGothic": {
+    "message": "NanumGothic"
+  },
+  "fontAppleMyungjo": {
+    "message": "AppleMyungjo"
+  },
+  "fontNanumMyeongjo": {
+    "message": "NanumMyeongjo"
   },
   "readerFontSize": {
     "message": "Font size"
@@ -536,6 +610,10 @@
   "pdfDocumentChanged": {"message": "The document changed during preparation. Start PDF output again for the current document."},
   "releaseNotesLink": {"message": "What’s new"},
   "releaseNotesTitle": {"message": "Updated to v$VERSION$", "placeholders": {"version": {"content": "$1"}}},
+  "releaseNotes170Summary": {"message": "Highlight and underline selected text, keep notes beside the document, and choose from more colors and fonts."},
+  "releaseNotes170Marks": {"message": "Highlight or underline selected text from the selection menu or with Alt+H and Alt+U. Changes are saved to the original file."},
+  "releaseNotes170Colors": {"message": "Choose from 16 highlight colors and 16 accent colors in Settings, or set your own accent color for the light and dark themes."},
+  "releaseNotes170Fonts": {"message": "The Font menu adds fonts that come with your operating system, and the chosen font applies only to the document. Reading settings are grouped into Reading and Color."},
   "releaseNotes160Summary": {"message": "Notes no longer cover the document, and you can send feedback from Settings."},
   "releaseNotes160Feedback": {"message": "Open a Korean or English feedback form from Send feedback in Settings. Only the app version is filled in; document content is not sent."},
   "releaseNotes160ReviewLayout": {"message": "Opening the notes panel moves the document aside at its reading width so they do not overlap. If space is short, the explorer panel folds temporarily."},
@@ -573,6 +651,8 @@
   "shortcutOpenFolder": {"message": "Open folder"},
   "shortcutSearch": {"message": "Search"},
   "shortcutNotes": {"message": "Notes"},
+  "shortcutHighlight": {"message": "Highlight"},
+  "shortcutUnderline": {"message": "Underline"},
   "shortcutPdf": {"message": "PDF preview"},
   "shortcutGuide": {"message": "Markdown Leader guide"},
   "shortcutRefresh": {"message": "Automatic refresh"},

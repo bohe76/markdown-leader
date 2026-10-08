@@ -115,7 +115,7 @@ export function createMarkdownGuide({ document, t, button }) {
   shortcutsPanel.hidden = true
   const shortcutList = document.createElement('ul')
   shortcutList.className = 'ml-markdown-guide-shortcuts'
-  for (const [key, label] of [['O', 'shortcutOpenFile'], ['K', 'shortcutOpenFolder'], ['S', 'shortcutSearch'], ['M', 'shortcutNotes'], ['P', 'shortcutPdf'], ['G', 'shortcutGuide'], ['R', 'shortcutRefresh'], ['T', 'shortcutTheme']]) {
+  for (const [key, label] of [['O', 'shortcutOpenFile'], ['K', 'shortcutOpenFolder'], ['S', 'shortcutSearch'], ['M', 'shortcutNotes'], ['H', 'shortcutHighlight'], ['U', 'shortcutUnderline'], ['P', 'shortcutPdf'], ['G', 'shortcutGuide'], ['R', 'shortcutRefresh'], ['T', 'shortcutTheme']]) {
     const item = document.createElement('li')
     item.innerHTML = `<kbd>Alt</kbd><kbd>${key}</kbd>`
     item.append(document.createTextNode(t(label)))

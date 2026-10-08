@@ -71,6 +71,15 @@ export function patchTask(raw, line, checked) {
 
 export function markdownReviewSource(md) {
   md.core.ruler.push('review-source', state => {
+    let inline = 0
+    state.tokens.forEach((token, index) => {
+      if (token.type !== 'inline') return
+      // 선택 글자를 원본 블록에 대응시키도록 인라인 순번을 감싸는 요소에 남긴다. 숨은 문단은 목록 항목에 단다.
+      let container = state.tokens[index - 1]
+      if (container?.hidden && state.tokens[index - 2]?.type === 'list_item_open') container = state.tokens[index - 2]
+      if (container?.nesting === 1 && !container.hidden) container.attrSet('data-ml-inline', String(inline))
+      inline++
+    })
     for (const token of state.tokens) {
       if (token.map && (token.nesting === 1 || token.type === 'fence')) {
         token.attrSet('data-source-start', String(token.map[0]))

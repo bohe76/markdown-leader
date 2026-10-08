@@ -36,14 +36,14 @@ Markdown Leader는 일반 Markdown 편집기가 아닙니다. 로컬 문서를 �
 
 ### 일반 편집기로 전환하지 않는 검토
 
-- Markdown 체크박스를 바꾸고 선택 텍스트에 문맥 메모를 추가합니다.
+- Markdown 체크박스를 바꾸고, 선택 텍스트에 하이라이트·밑줄과 문맥 메모를 추가합니다.
 - 검토 메모를 원본 Markdown 끝의 HTML 주석에 보관해 문서와 함께 이동하게 합니다.
 - 저장 전 외부 변경을 감지해 다른 편집기의 작업을 조용히 덮어쓰지 않습니다.
 
 ### 기술 Markdown 읽기
 
 - 표, 코드 강조, 상대경로 이미지·링크, 각주, 안내 박스, MathJax 기반 TeX/LaTeX 수식과 Mermaid 다이어그램을 렌더링합니다.
-- 밝게·어둡게·시스템 테마와 글자 크기·줄간격·글꼴·읽기 폭을 로컬 읽기 환경으로 선택합니다.
+- 밝게·어둡게·시스템 테마와 하이라이트·강조 색, 글자 크기·줄간격·글꼴·읽기 폭을 로컬 읽기 환경으로 선택합니다.
 - 같은 렌더링 문서를 A4 미리보기와 Chrome PDF 인쇄 흐름에 사용합니다.
 
 ## 로컬 우선 개인정보와 권한
@@ -61,7 +61,7 @@ Markdown Leader는 일반 Markdown 편집기가 아닙니다. 로컬 문서를 �
 
 ## 설치와 지원
 
-- 이 저장소는 1.6.0 소스 스냅샷입니다. [Chrome 웹스토어](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) 등록정보에서 현재 설치 가능한 버전을 확인할 수 있습니다.
+- 이 저장소는 1.7.0 소스 스냅샷입니다. [Chrome 웹스토어](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) 등록정보에서 현재 설치 가능한 버전을 확인할 수 있습니다.
 - [오류 제보](https://github.com/bohe76/markdown-leader/issues/new?template=bug_report.yml) 또는 [기능 제안](https://github.com/bohe76/markdown-leader/issues/new?template=feature_request.yml)을 남길 수 있습니다.
 - 보안 취약점은 [bohe76@gmail.com](mailto:bohe76@gmail.com?subject=Markdown%20Leader%20security%20report)으로 비공개 제보합니다. 공개 이슈에는 올리지 마세요.
 - 로컬 Markdown 파일을 직접 열기 전에 확장 상세 화면에서 **파일 URL에 대한 액세스 허용**을 켭니다.
