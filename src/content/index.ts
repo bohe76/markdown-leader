@@ -5,10 +5,11 @@ import statusToastStyle from './status-toast.css?inline'
 import { createPDFPreview, fitTableWrapping, paginateDocument, PDF_CONTENT_STYLE } from './pdf-output.mjs'
 import pdfOutputStyle from './pdf-output.css?inline'
 import { createReaderLibrary } from './reader-library.mjs'
-import { createLibraryLock } from './library-lock.mjs'
+import { createLibraryLock, settleRuntimeDisconnect } from './library-lock.mjs'
 import { renderLibraryList } from './reader-library-ui.mjs'
 import { createReviewUI } from './review-ui.mjs'
 import { createRatingRequest } from './rating-request.mjs'
+import { feedbackFormURL } from './feedback-forms.mjs'
 import { createReleaseNotes } from './release-notes.mjs'
 import { createMarkdownGuide } from './markdown-guide.mjs'
 import reviewStyle from './review-ui.css?inline'
@@ -153,6 +154,9 @@ let explorerGeneration = 0
 let handleSource: DocumentSource | null = null
 let sourceSelection = 0
 let choosingSource = false
+let reviewOpen = false
+let reviewSidebarCollapsed = false
+let reviewSidebarKept = false
 let readerTabId: number | undefined
 let activeNavigation: 'files' | 'toc' | null = standaloneReader ? null : 'files'
 let activePanel: 'files' | 'toc' | 'settings' | 'recent' | 'favorites' | null = activeNavigation
@@ -301,6 +305,7 @@ app.innerHTML = `
     <div class="ml-settings-footer">
       <button data-release-notes type="button">${readerIcon('recent')}<span>${escapeHtml(t('releaseNotesLink'))}</span></button>
       <a data-rating-link>${readerIcon('star')}<span>${escapeHtml(t('ratingLink'))}</span></a>
+      <a data-feedback-link href="${escapeHtml(feedbackFormURL(readerLanguage, __APP_VERSION__))}" target="_blank" rel="noopener noreferrer">${readerIcon('note')}<span>${escapeHtml(t('feedbackLink'))}</span></a>
     </div>
     </div>
     </div>
@@ -400,7 +405,7 @@ const ratingRequest = createRatingRequest({
 })
 app.append(ratingRequest.element)
 const reviewToggle = app.querySelector<HTMLButtonElement>('[data-review-toggle]')!
-new MutationObserver(() => reviewToggle.setAttribute('aria-expanded', String(reviewUI.isOpen()))).observe(reviewUI.element, { attributes: true, subtree: true, attributeFilter: ['hidden'] })
+new MutationObserver(syncReviewLayout).observe(reviewUI.element, { attributes: true, subtree: true, attributeFilter: ['hidden'] })
 const documentLoading = createDocumentLoading({ content, document, window, onShow: () => setStatus(t('readerOpeningDocument')) })
 content.id = 'ml-document-panel'
 content.setAttribute('role', 'tabpanel')
@@ -464,11 +469,20 @@ function positionDocumentSearch() {
   reviewUI.refreshAnchors()
   if (searchMode !== 'toc') return
   const panel = app.querySelector<HTMLElement>('.ml-search')!
-  panel.style.left = `${box.left}px`
-  panel.style.width = `${Math.min(420, box.width)}px`
+  const width = Math.min(420, box.width)
+  panel.style.left = `${box.left + (box.width - width) / 2}px`
+  panel.style.width = `${width}px`
 }
 
-const documentLayoutObserver = new ResizeObserver(positionDocumentSearch)
+// 관찰 콜백 안에서 탭 줄 크기를 바꾸면 같은 프레임의 알림이 남으므로 다음 프레임에 한 번만 맞춘다.
+let documentLayoutFrame: number | null = null
+const documentLayoutObserver = new ResizeObserver(() => {
+  if (documentLayoutFrame !== null) return
+  documentLayoutFrame = requestAnimationFrame(() => {
+    documentLayoutFrame = null
+    positionDocumentSearch()
+  })
+})
 documentLayoutObserver.observe(app.querySelector('.ml-main')!)
 documentLayoutObserver.observe(content)
 
@@ -506,8 +520,41 @@ function hydrateLocalImages() {
   }
 }
 
+// 메모 패널이 열리면 CSS가 본문을 왼쪽으로 옮긴다. 그래도 겹치면 탐색 패널을 저장하지 않고 임시로 접는다.
+function syncReviewLayout() {
+  const open = reviewUI.isOpen()
+  if (open === reviewOpen) return
+  reviewOpen = open
+  reviewToggle.setAttribute('aria-expanded', String(open))
+  document.documentElement.dataset.mlReviewOpen = String(open)
+  if (open) collapseSidebarForReview()
+  else if (reviewSidebarCollapsed || reviewSidebarKept) {
+    reviewSidebarCollapsed = false
+    reviewSidebarKept = false
+    applySidebar()
+  }
+  positionDocumentSearch()
+}
+
+function collapseSidebarForReview() {
+  if (!reviewOpen || reviewSidebarKept || reviewSidebarCollapsed || settings.sidebarCollapsed || content.hidden) return
+  const panel = reviewUI.element.querySelector('.ml-review-panel') as HTMLElement
+  if (content.getBoundingClientRect().right <= panel.getBoundingClientRect().left) return
+  reviewSidebarCollapsed = true
+  applySidebar()
+}
+
+// 임시로 접힌 탐색 패널을 사용자가 펼치면 메모 패널을 닫을 때까지 다시 접지 않는다.
+function keepSidebarForReview() {
+  if (!reviewSidebarCollapsed) return false
+  reviewSidebarCollapsed = false
+  reviewSidebarKept = true
+  applySidebar()
+  return true
+}
+
 function applySidebar() {
-  const collapsed = Boolean(settings.sidebarCollapsed)
+  const collapsed = Boolean(settings.sidebarCollapsed) || reviewSidebarCollapsed
   const desktop = window.innerWidth > 850
   const width = desktop ? clampSidebarWidth(settings.sidebarWidthPx, window.innerWidth) : 250
   document.documentElement.style.setProperty('--ml-sidebar-width', `${width}px`)
@@ -972,6 +1019,7 @@ async function saveDocumentRevision(id: string, expectedRaw: string, nextRaw: st
 
 app.querySelector('[data-sidebar-toggle]')!.addEventListener('click', () => {
   if (searchMode === 'files') closeSearch()
+  if (keepSidebarForReview()) return
   saveSetting('sidebarCollapsed', !settings.sidebarCollapsed)
   applySidebar()
 })
@@ -1568,7 +1616,11 @@ function readText(url: string, source: DocumentSource | null = handleSource): Pr
     chrome.runtime.sendMessage({ action: 'readText', url }, (result: ReadResult) => {
       try {
         const runtimeError = chrome.runtime.lastError
-        if (runtimeError) return reject(new Error(runtimeError.message))
+        if (runtimeError) {
+          const failure = new Error(runtimeError.message)
+          if (/receiving end does not exist|message (port|channel) closed/i.test(runtimeError.message || '')) return void settleRuntimeDisconnect(chrome.runtime, failure).then(reject)
+          return reject(failure)
+        }
         if (!result?.ok || typeof result.text !== 'string') {
           const error = new Error(result?.error || t('readerFileReadFailed'))
           error.name = result?.errorName || 'Error'
@@ -1932,6 +1984,7 @@ function scheduleTocUpdate() {
 window.addEventListener('scroll', scheduleTocUpdate, { passive: true })
 window.addEventListener('resize', () => {
   applySidebar()
+  collapseSidebarForReview()
   scheduleTocUpdate()
 })
 void document.fonts.ready.then(scheduleTocUpdate)
@@ -2442,6 +2495,7 @@ app.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((button) => {
     activePanel = tab
     if (tab === 'files' || tab === 'toc') activeNavigation = tab
     if (settings.sidebarCollapsed) { saveSetting('sidebarCollapsed', false); applySidebar() }
+    keepSidebarForReview()
     updateLibraryPanels()
     updateNavigation()
   })

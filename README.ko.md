@@ -50,7 +50,7 @@ Markdown Leader는 일반 Markdown 편집기가 아닙니다. 로컬 문서를 �
 
 읽기만 하면 원본 파일은 바뀌지 않습니다. 체크박스와 메모 변경에는 명시적인 쓰기 권한이 필요하며, Markdown Leader는 문서나 메모를 개발자 서버로 업로드하지 않습니다.
 
-메모는 Markdown 원본과 함께 저장되도록 설계했습니다. 파일에 접근할 수 있는 사람은 메모도 읽을 수 있습니다. 문서에 포함된 외부 이미지와 링크는 자체 네트워크 요청을 만들 수 있으며 Markdown Leader 서버를 거치지 않습니다. 저장 위치·권한·삭제는 [공개 개인정보 처리방침](https://bohe76.github.io/markdown-leader/)에서 확인하세요.
+메모는 Markdown 원본과 함께 저장되도록 설계했습니다. 파일에 접근할 수 있는 사람은 메모도 읽을 수 있습니다. 문서에 포함된 외부 이미지와 링크는 자체 네트워크 요청을 만들 수 있으며 Markdown Leader 서버를 거치지 않습니다. 저장 위치·권한·삭제는 [공개 개인정보 처리방침](https://bohe76.github.io/markdown-leader/privacy/)에서 확인하세요.
 
 ## 지원 환경과 범위
 
@@ -61,7 +61,7 @@ Markdown Leader는 일반 Markdown 편집기가 아닙니다. 로컬 문서를 �
 
 ## 설치와 지원
 
-- 이 저장소는 1.5.0 소스 스냅샷입니다. [Chrome 웹스토어](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) 등록정보에서 현재 설치 가능한 버전을 확인할 수 있습니다.
+- 이 저장소는 1.6.0 소스 스냅샷입니다. [Chrome 웹스토어](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) 등록정보에서 현재 설치 가능한 버전을 확인할 수 있습니다.
 - [오류 제보](https://github.com/bohe76/markdown-leader/issues/new?template=bug_report.yml) 또는 [기능 제안](https://github.com/bohe76/markdown-leader/issues/new?template=feature_request.yml)을 남길 수 있습니다.
 - 보안 취약점은 [bohe76@gmail.com](mailto:bohe76@gmail.com?subject=Markdown%20Leader%20security%20report)으로 비공개 제보합니다. 공개 이슈에는 올리지 마세요.
 - 로컬 Markdown 파일을 직접 열기 전에 확장 상세 화면에서 **파일 URL에 대한 액세스 허용**을 켭니다.
@@ -73,7 +73,7 @@ pnpm install --frozen-lockfile
 pnpm build
 ```
 
-Markdown Leader는 문서를 로컬에서 처리합니다. 체크박스와 검토 메모 변경에는 명시적인 쓰기 권한이 필요합니다. [공개 개인정보 처리방침](https://bohe76.github.io/markdown-leader/)을 확인하세요.
+Markdown Leader는 문서를 로컬에서 처리합니다. 체크박스와 검토 메모 변경에는 명시적인 쓰기 권한이 필요합니다. [공개 개인정보 처리방침](https://bohe76.github.io/markdown-leader/privacy/)을 확인하세요.
 
 ## 자주 묻는 질문
 

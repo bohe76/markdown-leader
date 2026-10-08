@@ -75,9 +75,15 @@ export function createDocumentTabStrip({ document, t, onSelect, onClose, onAdd, 
   next.addEventListener('click', () => move(1))
   addButton.addEventListener('click', onAdd)
   list.addEventListener('scroll', updateOverflow, { passive: true })
-  const observer = new document.defaultView.ResizeObserver(() => {
-    updateOverflow()
-    reveal(items.get(selectedId))
+  // 관찰 콜백 안에서 목록 폭을 바꾸면 상위 요소 알림이 남으므로 다음 프레임에 한 번만 맞춘다.
+  let overflowFrame = null
+  const observer = new view.ResizeObserver(() => {
+    if (overflowFrame !== null) return
+    overflowFrame = view.requestAnimationFrame(() => {
+      overflowFrame = null
+      updateOverflow()
+      reveal(items.get(selectedId))
+    })
   })
   observer.observe(element)
 
@@ -340,6 +346,7 @@ export function createDocumentTabStrip({ document, t, onSelect, onClose, onAdd, 
     dispose() {
       stopDrag()
       observer.disconnect()
+      if (overflowFrame !== null) view.cancelAnimationFrame(overflowFrame)
       items.clear()
       element.remove()
     },

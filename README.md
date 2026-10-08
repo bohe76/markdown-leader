@@ -50,7 +50,7 @@ Markdown Leader is not a general Markdown editor. Browse and search local docume
 
 Reading a document does not change it. Checklist and note changes require explicit write permission, and Markdown Leader does not upload documents or notes to a developer server.
 
-Notes are intentionally stored with the Markdown source. Anyone who can access the file can read them. External images and links embedded in a document can still make their own network requests; they are not routed through a Markdown Leader server. See the [public privacy policy](https://bohe76.github.io/markdown-leader/) for storage, permissions, and deletion details.
+Notes are intentionally stored with the Markdown source. Anyone who can access the file can read them. External images and links embedded in a document can still make their own network requests; they are not routed through a Markdown Leader server. See the [public privacy policy](https://bohe76.github.io/markdown-leader/privacy/) for storage, permissions, and deletion details.
 
 ## Compatibility and scope
 
@@ -61,7 +61,7 @@ Notes are intentionally stored with the Markdown source. Anyone who can access t
 
 ## Install and support
 
-- This repository contains the 1.5.0 source snapshot. The [Chrome Web Store](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) listing shows the currently available version.
+- This repository contains the 1.6.0 source snapshot. The [Chrome Web Store](https://chromewebstore.google.com/detail/markdown-leader/mglmfpabbmcifhimdlembgchpaofbogm) listing shows the currently available version.
 - [Report a bug](https://github.com/bohe76/markdown-leader/issues/new?template=bug_report.yml) or [request a feature](https://github.com/bohe76/markdown-leader/issues/new?template=feature_request.yml).
 - Report security vulnerabilities privately at [bohe76@gmail.com](mailto:bohe76@gmail.com?subject=Markdown%20Leader%20security%20report). Do not post them in a public issue.
 - Enable **Allow access to file URLs** in the extension details before opening local Markdown files directly.
@@ -73,7 +73,7 @@ pnpm install --frozen-lockfile
 pnpm build
 ```
 
-Markdown Leader processes documents locally. Checklist and review-note changes require explicit write permission. See the [public privacy policy](https://bohe76.github.io/markdown-leader/).
+Markdown Leader processes documents locally. Checklist and review-note changes require explicit write permission. See the [public privacy policy](https://bohe76.github.io/markdown-leader/privacy/).
 
 ## FAQ
 

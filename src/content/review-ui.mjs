@@ -26,7 +26,7 @@ export function createReviewUI({ document, window, content, t, onSave }) {
   const header = document.createElement('header')
   const title = document.createElement('strong')
   title.textContent = t('reviewTitle')
-  const close = button('reviewClose', () => { panel.hidden = true })
+  const close = button('reviewClose', hidePanel)
   header.append(title, close)
   const list = document.createElement('div')
   list.className = 'ml-review-list'
@@ -77,11 +77,12 @@ export function createReviewUI({ document, window, content, t, onSave }) {
     return node
   }
 
+  const skippedText = node => node.parentElement?.closest('button, [aria-hidden="true"], details, script, style, mjx-assistive-mml')
+
   function textIndex() {
     const walker = document.createTreeWalker(content, window.NodeFilter.SHOW_TEXT, {
       acceptNode(node) {
-        return node.parentElement?.closest('button, [aria-hidden="true"], details, script, style, mjx-assistive-mml')
-          ? window.NodeFilter.FILTER_REJECT : window.NodeFilter.FILTER_ACCEPT
+        return skippedText(node) ? window.NodeFilter.FILTER_REJECT : window.NodeFilter.FILTER_ACCEPT
       }
     })
     const nodes = []
@@ -197,6 +198,15 @@ export function createReviewUI({ document, window, content, t, onSave }) {
     positionMarkers()
   }
 
+  // 패널을 닫으면 선택한 메모의 본문 강조도 함께 해제한다.
+  function hidePanel() {
+    panel.hidden = true
+    if (selectedId === null) return
+    selectedId = null
+    updateSelectedCards()
+    positionMarkers()
+  }
+
   function updateSelectedCards() {
     for (const card of list.querySelectorAll('[data-note-id]')) {
       const selected = card.dataset.noteId === selectedId
@@ -205,11 +215,33 @@ export function createReviewUI({ document, window, content, t, onSave }) {
     }
   }
 
+  // 범위에 통째로 들어간 li·code 요소 상자를 빼고 글자 줄 상자만 모아 줄마다 하나로 합친다.
+  function lineRects(range) {
+    const fragments = []
+    const root = range.commonAncestorContainer
+    const walker = document.createTreeWalker(root, window.NodeFilter.SHOW_TEXT)
+    for (let node = root.nodeType === window.Node.TEXT_NODE ? root : walker.nextNode(); node; node = walker.nextNode()) {
+      if (!range.intersectsNode(node) || skippedText(node)) continue
+      const part = document.createRange()
+      part.selectNodeContents(node)
+      if (node === range.startContainer) part.setStart(node, range.startOffset)
+      if (node === range.endContainer) part.setEnd(node, range.endOffset)
+      fragments.push(...[...part.getClientRects()].filter(fragment => fragment.width > 0 && fragment.height > 0))
+    }
+    const lines = []
+    for (const { left, top, right, bottom } of fragments.sort((a, b) => a.top - b.top || a.left - b.left)) {
+      const line = lines.find(item => Math.min(item.bottom, bottom) - Math.max(item.top, top) > Math.min(item.bottom - item.top, bottom - top) / 2)
+      if (!line) lines.push({ left, top, right, bottom })
+      else Object.assign(line, { left: Math.min(line.left, left), top: Math.min(line.top, top), right: Math.max(line.right, right), bottom: Math.max(line.bottom, bottom) })
+    }
+    return lines.map(line => ({ ...line, width: line.right - line.left, height: line.bottom - line.top }))
+  }
+
   function positionMarkers() {
     frame = null
     for (const { note, range, marker, highlight } of anchors) {
       const rect = range.getBoundingClientRect()
-      const fragments = [...range.getClientRects()].filter(fragment => fragment.width > 0 && fragment.height > 0)
+      const fragments = lineRects(range)
       const end = fragments.at(-1)
       const visible = rect.bottom > 56 && rect.top < window.innerHeight && rect.width > 0
       marker.hidden = !end || end.bottom <= 56 || end.top >= window.innerHeight
@@ -289,7 +321,11 @@ export function createReviewUI({ document, window, content, t, onSave }) {
       card.classList.toggle('is-selected', selectedId === note.id)
       card.setAttribute('aria-current', String(selectedId === note.id))
       card.addEventListener('click', event => {
-        if (!editing && !event.target.closest('button, textarea')) selectNote(note.id, true)
+        if (editing || event.target.closest('button, textarea')) return
+        // 카드 글자를 드래그해 복사하려는 선택은 메모 선택으로 지우지 않는다.
+        const selected = window.getSelection?.()
+        if (selected && !selected.isCollapsed && card.contains(selected.anchorNode)) return
+        selectNote(note.id, true)
       })
       card.addEventListener('keydown', event => {
         if (event.target === card && (event.key === 'Enter' || event.key === ' ')) {
@@ -457,11 +493,11 @@ export function createReviewUI({ document, window, content, t, onSave }) {
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return
     add.hidden = true
-    if (panel.contains(document.activeElement)) { panel.hidden = true; content.focus?.() }
+    if (panel.contains(document.activeElement)) { hidePanel(); content.focus?.() }
   })
   window.addEventListener('scroll', schedulePosition, { passive: true })
   window.addEventListener('resize', schedulePosition, { passive: true })
   const layoutObserver = window.ResizeObserver ? new window.ResizeObserver(schedulePosition) : null
   layoutObserver?.observe(content)
-  return { element, clear, forget, invalidateDraft, setDocument, refreshAnchors, isOpen: () => !panel.hidden, toggle() { panel.hidden = !panel.hidden; if (!panel.hidden) renderPanel() } }
+  return { element, clear, forget, invalidateDraft, setDocument, refreshAnchors, isOpen: () => !panel.hidden, toggle() { if (panel.hidden) { panel.hidden = false; renderPanel() } else hidePanel() } }
 }

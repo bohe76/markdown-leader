@@ -1,4 +1,4 @@
-.ml-document.ml-paged-document { width: 210mm; max-width: none; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.ml-document.ml-paged-document { --ml-document-width: 210mm; width: 210mm; max-width: none; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .ml-document.ml-paged-document > .ml-pdf-page:first-child { margin-top: 0; }
 .ml-pdf-measure { position: fixed; left: -100000px; top: 0; width: 210mm; visibility: hidden; pointer-events: none; }
 .ml-pdf-dialog {
