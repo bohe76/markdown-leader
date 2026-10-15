@@ -131,16 +131,16 @@ export function createRatingRequest({ document, window, storage, lock, t, settin
       timer = window.setTimeout(() => void showIfDue().catch(onError), 30000)
       return
     }
-    const { changed } = await update(state => {
+    await update(state => {
       if (!ratingPromptDue(state, now())) return false
+      // 잠금을 기다리는 동안 다른 안내가 열렸으면 횟수를 쓰지 않고 다음 세션으로 미룬다.
+      if (!canShow() || document.querySelector('dialog[open]')) return false
       state.promptCount += 1
       state.nextPromptAt = now() + RATING_SNOOZE_MS
+      element.showModal()
+      later.focus()
       return true
     })
-    if (!changed) return
-    if (!canShow() || document.querySelector('dialog[open]')) return
-    element.showModal()
-    later.focus()
   }
   function schedule() {
     if (timer === undefined) timer = window.setTimeout(() => void showIfDue().catch(error => { timer = undefined; onError(error) }), 5000)

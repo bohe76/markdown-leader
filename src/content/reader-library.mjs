@@ -1,5 +1,9 @@
+import { folderLinkCandidates } from './folder-links.mjs'
+
 const RECENT = 'readerLibrary:recent:'
 const FAVORITE = 'readerLibrary:favorite:'
+// 폴더 연결은 최근·즐겨찾기 항목이 아니므로 항목 id와 겹치지 않는 별도 키로 핸들 저장소에 둔다.
+const FOLDER_LINK = 'link:'
 
 function nativeURL(value) {
   if (!value) return undefined
@@ -65,6 +69,7 @@ export function createReaderLibrary({ storage: persistedStorage, indexedDB, onCh
   const handles = handleStore(indexedDB, () => checkLease())
   const liveHandles = new Map()
   const liveContexts = new Map()
+  const liveFolderLinks = new Map()
   let entries = new Map()
   let recentIds = []
   /** @type {Promise<any>} */
@@ -120,7 +125,8 @@ export function createReaderLibrary({ storage: persistedStorage, indexedDB, onCh
     if (liveHandles.has(id)) return liveHandles.get(id)
     const saved = await handles.get(id)
     const revision = entries.get(id)?.bindingRevision
-    const handle = revision ? (saved?.bindingRevision === revision ? saved.handle : null) : saved
+    // revision 없는 항목에 남은 revision 기록은 다른 origin이 지운 뒤 남은 고아 기록이므로 핸들로 쓰지 않는다.
+    const handle = revision ? (saved?.bindingRevision === revision ? saved.handle : null) : (saved?.bindingRevision ? null : saved)
     if (handle) liveHandles.set(id, handle)
     return handle
   }
@@ -128,7 +134,7 @@ export function createReaderLibrary({ storage: persistedStorage, indexedDB, onCh
     if (liveContexts.has(id)) return liveContexts.get(id)
     const saved = await handles.get(id + ':context')
     const revision = entries.get(id)?.bindingRevision
-    const context = revision ? (saved?.bindingRevision === revision ? saved.context : null) : saved
+    const context = revision ? (saved?.bindingRevision === revision ? saved.context : null) : (saved?.bindingRevision ? null : saved)
     if (context) liveContexts.set(id, context)
     return context
   }
@@ -160,6 +166,21 @@ export function createReaderLibrary({ storage: persistedStorage, indexedDB, onCh
     getHandle: id => serialize(async () => { await refresh(); return getHandle(id) }),
     getContext: id => serialize(async () => { await refresh(); return getContext(id) }),
     find: target => serialize(async () => { await refresh(); return snapshot(await findEntry(target)) }),
+    linkFolder: (url, handle) => serialize(async () => {
+      if (handle?.kind !== 'directory' || typeof url !== 'string' || !url.startsWith('file:///') || !url.endsWith('/')) throw new Error('ML_LIBRARY_INVALID_ENTRY')
+      await handles.put(FOLDER_LINK + url, handle)
+      liveFolderLinks.set(url, handle)
+    }),
+    // 가장 가까운 연결 폴더를 찾는다. 결과의 segments는 그 폴더에서 문서까지의 상대 경로다.
+    findFolderLink: fileURL => serialize(async () => {
+      for (const candidate of folderLinkCandidates(fileURL)) {
+        const handle = liveFolderLinks.get(candidate.url) || await handles.get(FOLDER_LINK + candidate.url)
+        if (handle?.kind !== 'directory') continue
+        liveFolderLinks.set(candidate.url, handle)
+        return { url: candidate.url, handle, segments: candidate.segments }
+      }
+      return null
+    }),
     removeRecent: id => serialize(async () => {
       await storage.remove(RECENT + id)
       await refresh()

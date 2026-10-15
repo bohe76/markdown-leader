@@ -59,10 +59,13 @@ function taskLines(raw) {
     /^\[[ xX]\] /.test(token.content)).map(token => token.map[0]))
 }
 
+// 체크박스를 바꿀 수 있는 작업 항목 행이다. 렌더링에서 활성화하는 체크박스와 저장에서 받아들이는 행이 같은 규칙을 쓴다.
+const TASK_LINE_RE = /^(?:\uFEFF)?[ \t]*(?:>[ \t]*)*(?:[-+*]|\d+[.)])[ \t]+\[([ xX])\]/
+
 export function patchTask(raw, line, checked) {
   if (!Number.isInteger(line) || !taskLines(raw).has(line)) throw invalid()
   const source = lines(raw)
-  const match = /^(?:\uFEFF)?[ \t]*(?:>[ \t]*)*(?:[-+*]|\d+[.)])[ \t]+\[([ xX])\]/.exec(source[line])
+  const match = TASK_LINE_RE.exec(source[line])
   if (!match) throw invalid()
   const index = match[0].length - 2
   source[line] = source[line].slice(0, index) + (checked ? 'x' : ' ') + source[line].slice(index + 1)
@@ -74,18 +77,20 @@ export function markdownReviewSource(md) {
     let inline = 0
     state.tokens.forEach((token, index) => {
       if (token.type !== 'inline') return
-      // 선택 글자를 원본 블록에 대응시키도록 인라인 순번을 감싸는 요소에 남긴다. 숨은 문단은 목록 항목에 단다.
+      // 선택 글자를 원본 블록에 대응시키도록 인라인 순번을 감싸는 요소에 남긴다. 숨은 문단은 목록 항목이나 정의 설명에 단다.
       let container = state.tokens[index - 1]
-      if (container?.hidden && state.tokens[index - 2]?.type === 'list_item_open') container = state.tokens[index - 2]
+      if (container?.hidden && ['list_item_open', 'dd_open'].includes(state.tokens[index - 2]?.type)) container = state.tokens[index - 2]
       if (container?.nesting === 1 && !container.hidden) container.attrSet('data-ml-inline', String(inline))
       inline++
     })
+    const sourceLines = state.src.split('\n')
     for (const token of state.tokens) {
       if (token.map && (token.nesting === 1 || token.type === 'fence')) {
         token.attrSet('data-source-start', String(token.map[0]))
         token.attrSet('data-source-end', String(token.map[1]))
       }
-      if (token.type === 'inline' && token.map) {
+      // 저장 규칙이 받아들이지 않는 행(정의 목록 안, 같은 행의 중첩 목록)의 체크박스는 활성화하지 않는다.
+      if (token.type === 'inline' && token.map && TASK_LINE_RE.test(sourceLines[token.map[0]] ?? '')) {
         for (const child of token.children || []) {
           if (child.type === 'html_inline' && child.content.startsWith('<input class="task-list-item-checkbox"')) {
             child.content = child.content.replace('<input ', `<input data-task-line="${token.map[0]}" `)

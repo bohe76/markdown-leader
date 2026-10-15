@@ -19,9 +19,9 @@ export function locateReviewQuote(text, note) {
 }
 
 /**
- * @param {{ document: any, window: any, content: any, t: (key: string) => string, onSave: (value: any) => Promise<string>, marks?: { describe: (range: any) => any, apply: (kind: 'mark' | 'ins', state: any, on: boolean) => Promise<void> } | null }} options
+ * @param {{ document: any, window: any, content: any, t: (key: string) => string, onSave: (value: any) => Promise<string>, marks?: { describe: (range: any) => any, apply: (kind: 'mark' | 'ins', state: any, on: boolean) => Promise<void> } | null, dialog?: { choose: (value: { heading: string, message: string, action: string, remove: string }) => Promise<string> } | null }} options
  */
-export function createReviewUI({ document, window, content, t, onSave, marks = null }) {
+export function createReviewUI({ document, window, content, t, onSave, marks = null, dialog = null }) {
   const element = document.createElement('div')
   element.className = 'ml-review-ui'
   const panel = document.createElement('aside')
@@ -37,21 +37,20 @@ export function createReviewUI({ document, window, content, t, onSave, marks = n
   list.className = 'ml-review-list'
   panel.append(header, list)
   const add = button('reviewAdd', () => {
-    if (!selection || !current?.ready) return
+    // 저장 중인 초안은 아직 남아 있어 미저장으로 오인되므로 「수정」처럼 저장이 끝날 때까지 받지 않는다.
+    if (!selection || !current?.ready || saving.has(current.id)) return
     if (disconnectedDrafts.has(drafts.get(current.id))) {
-      toolbar.hidden = true
-      panel.hidden = false
-      renderPanel()
-      list.querySelector('textarea')?.focus()
+      focusDraft()
       return
     }
+    // 확인 창을 누르면 본문 선택이 풀리므로 새 초안은 확인 전에 만들어 둔다.
     const draft = { ...selection, id: window.crypto.randomUUID(), text: '', createdAt: new Date().toISOString() }
-    drafts.set(current.id, draft)
-    draftOriginals.delete(current.id)
     toolbar.hidden = true
-    panel.hidden = false
-    renderPanel()
-    list.querySelector('textarea')?.focus()
+    void replaceDraft(() => {
+      drafts.set(current.id, draft)
+      draftOriginals.delete(current.id)
+      focusDraft()
+    })
   })
   add.className = 'ml-review-add'
   withIcon(add, 'note')
@@ -429,9 +428,7 @@ export function createReviewUI({ document, window, content, t, onSave, marks = n
         input.value = draft.text
         input.rows = 5
         input.addEventListener('input', () => { draft.text = input.value; save.disabled = !input.value.trim() || saving.has(current.id) || disconnectedDrafts.has(draft) })
-        const save = button('reviewSave', () => persist(notes.some(item => item.id === draft.id)
-          ? notes.map(item => item.id === draft.id ? { ...draft, text: input.value } : item)
-          : [...notes, { ...draft, text: input.value }], draft))
+        const save = button('reviewSave', () => saveDraft(draft))
         save.disabled = !draft.text.trim() || saving.has(current.id) || disconnectedDrafts.has(draft)
         input.disabled = saving.has(current.id)
         const cancel = button('reviewCancel', () => { drafts.delete(current.id); draftOriginals.delete(current.id); renderPanel() })
@@ -450,7 +447,12 @@ export function createReviewUI({ document, window, content, t, onSave, marks = n
       locate.disabled = !anchor
       const edit = button('reviewEdit', () => {
         if (disconnectedDrafts.has(drafts.get(current.id))) return
-        drafts.set(current.id, { ...note }); draftOriginals.set(current.id, { id: note.id, version: noteVersion(note) }); renderPanel(); list.querySelector('textarea')?.focus()
+        void replaceDraft(() => {
+          // 앞 초안을 저장했다면 다시 읽은 최신 메모를 기준으로 수정한다.
+          const latest = notes.find(item => item.id === note.id)
+          if (!latest) { renderPanel(); return }
+          drafts.set(current.id, { ...latest }); draftOriginals.set(current.id, { id: latest.id, version: noteVersion(latest) }); renderPanel(); list.querySelector('textarea')?.focus()
+        })
       })
       const remove = button('reviewDelete', () => persist(notes.filter(item => item.id !== note.id)))
       remove.disabled = saving.has(current.id)
@@ -458,6 +460,57 @@ export function createReviewUI({ document, window, content, t, onSave, marks = n
       actions.append(locate, edit, remove)
       card.append(text, actions)
       list.append(card)
+  }
+
+  function saveDraft(draft) {
+    return persist(notes.some(item => item.id === draft.id)
+      ? notes.map(item => item.id === draft.id ? { ...draft } : item)
+      : [...notes, { ...draft }], draft)
+  }
+
+  function focusDraft() {
+    toolbar.hidden = true
+    panel.hidden = false
+    renderPanel()
+    list.querySelector('textarea')?.focus()
+  }
+
+  // 새 메모는 글이 있을 때, 수정은 원래 내용과 다를 때 저장하지 않은 초안으로 본다. 빈 글은 저장할 수 없으므로 제외한다.
+  function hasUnsavedDraft(draft, owner = current.id) {
+    if (!draft?.text.trim()) return false
+    const original = draftOriginals.get(owner)
+    return original?.id !== draft.id || noteVersion(draft) !== original.version
+  }
+
+  // 저장하지 않은 초안을 알림 없이 버리지 않고 저장·저장 안 함·취소를 묻는다. 계속 진행해도 되면 true다.
+  async function resolveDraft() {
+    const owner = current.id
+    const existing = drafts.get(owner)
+    if (!dialog || !hasUnsavedDraft(existing)) return true
+    const choice = await dialog.choose({ heading: t('reviewUnsavedTitle'), message: t('reviewUnsavedDetails'), action: t('reviewSave'), remove: t('reviewDontSave') })
+    if (current?.id !== owner || !current.ready || drafts.get(owner) !== existing) return false
+    // 확인 중 연결이 바뀐 초안은 기존 보호 동작대로 초안에 머문다.
+    if (disconnectedDrafts.has(existing)) { focusDraft(); return false }
+    // 공통 확인 창은 주요 동작을 'reconnect', 보조 동작을 'remove'로 돌려준다.
+    if (choice === 'reconnect') {
+      await saveDraft(existing)
+      if (current?.id !== owner || !current.ready) return false
+      // 권한 거부·외부 변경 등으로 저장하지 못하면 초안이 남으므로 기존 초안에 머문다.
+      if (drafts.get(owner) === existing) { focusDraft(); return false }
+    } else if (choice === 'remove') {
+      drafts.delete(owner)
+      draftOriginals.delete(owner)
+    } else {
+      focusDraft()
+      return false
+    }
+    return true
+  }
+
+  // 물을 초안이 없으면 지금처럼 바로 연다(새 메모·수정 화면이 같은 이벤트 안에서 열려야 한다).
+  function replaceDraft(open) {
+    if (!dialog || !hasUnsavedDraft(drafts.get(current.id))) { open(); return }
+    return resolveDraft().then(proceed => { if (proceed) open() })
   }
 
   async function persist(nextNotes, draft) {
@@ -574,5 +627,10 @@ export function createReviewUI({ document, window, content, t, onSave, marks = n
   window.addEventListener('resize', schedulePosition, { passive: true })
   const layoutObserver = window.ResizeObserver ? new window.ResizeObserver(schedulePosition) : null
   layoutObserver?.observe(content)
-  return { element, markSelection, clear, forget, invalidateDraft, setDocument, refreshAnchors, isOpen: () => !panel.hidden, toggle() { if (panel.hidden) { panel.hidden = false; renderPanel() } else hidePanel() } }
+  // 페이지를 떠나기 전 경고용: 열린 모든 문서 중 저장하지 않은 초안이 하나라도 있는지 본다.
+  const hasUnsavedDrafts = () => [...drafts].some(([owner, draft]) => hasUnsavedDraft(draft, owner))
+  // 문서 탭 닫기용: 그 문서에 저장하지 않은 초안이 있는지 보고, 현재 문서면 저장·저장 안 함·취소를 묻는다.
+  const hasUnsavedDraftFor = id => hasUnsavedDraft(drafts.get(id), id)
+  const confirmClose = id => current?.id === id && current.ready ? resolveDraft() : Promise.resolve(!hasUnsavedDraftFor(id))
+  return { element, markSelection, clear, forget, invalidateDraft, setDocument, refreshAnchors, hasUnsavedDrafts, hasUnsavedDraftFor, confirmClose, isOpen: () => !panel.hidden, toggle() { if (panel.hidden) { panel.hidden = false; renderPanel() } else hidePanel() } }
 }

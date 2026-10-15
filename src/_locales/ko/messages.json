@@ -50,7 +50,6 @@
   "readerSortZ": { "message": "이름순 · Z → A" },
   "readerSortN": { "message": "수정일순 · 최근 먼저" },
   "readerSortO": { "message": "수정일순 · 오래된 먼저" },
-  "readerMarkdownFilesOnly": { "message": "Markdown 문서만 표시" },
   "extensionDescription": {
     "message": "AI가 작성한 로컬 Markdown을 읽고 검토하세요. 문서를 탐색·검색하고 체크박스 변경과 메모를 원본에 저장합니다."
   },
@@ -154,20 +153,8 @@
   "readerNextSearchResult": {
     "message": "다음 검색 결과"
   },
-  "readerClearSearch": {
-    "message": "검색 지우기"
-  },
   "readerReadingSettings": {
     "message": "읽기 설정"
-  },
-  "readerAutomaticRefresh": {
-    "message": "자동 새로고침"
-  },
-  "readerRefreshInterval": {
-    "message": "새로고침 주기"
-  },
-  "readerSecondsUnit": {
-    "message": "초"
   },
   "readerTheme": {
     "message": "테마"
@@ -237,12 +224,6 @@
   },
   "readerA4PreviewNote": {
     "message": "A4 페이지 · 여백 20mm · 리본의 PDF 버튼으로 같은 배치를 출력할 수 있습니다."
-  },
-  "readerKeyboardShortcuts": {
-    "message": "키보드 단축키"
-  },
-  "readerRefresh": {
-    "message": "새로고침"
   },
   "readerSearchMatchTitle": {
     "message": "검색어가 포함된 문서 또는 폴더"
@@ -458,23 +439,35 @@
   "readerClose": {
     "message": "닫기"
   },
-  "readerReconnectTitle": {
-    "message": "파일 또는 폴더를 다시 연결하세요."
-  },
-  "readerReconnectDetails": {
-    "message": "이 항목에 접근하려면 원래 파일 또는 폴더를 다시 선택하세요."
-  },
   "readerSelectFile": {
     "message": "파일 선택"
   },
-  "readerSelectFolder": {
-    "message": "폴더 선택"
+  "readerReviewConnectTitle": {
+    "message": "원본을 연결하세요."
   },
-  "readerReviewChooseTitle": {
-    "message": "수정할 원본 파일을 선택하세요."
+  "readerReviewConnectMessage": {
+    "message": "이 문서는 Chrome이 파일 주소로 직접 연 문서라서, Chrome 보안 정책상 저장하려면 원본을 한 번 연결해야 합니다."
   },
-  "readerReviewChooseMessage": {
-    "message": "이 문서의 체크박스와 메모를 저장하려면 아래 원본 파일을 선택하세요."
+  "readerReviewConnectFolderHint": {
+    "message": "• 폴더 연결: 그 폴더(또는 상위 폴더) 안의 문서는 다음부터 바로 저장됩니다."
+  },
+  "readerReviewConnectFileHint": {
+    "message": "• 파일 선택: 이 문서만 연결합니다."
+  },
+  "readerReviewConnectDropHint": {
+    "message": "• 파일을 고르지 않고 저장하려면: Chrome 오른쪽 위 Markdown Leader 아이콘 → 「리더 열기」를 누른 뒤, 열린 리더에 이 파일을 끌어다 놓으세요."
+  },
+  "readerReviewConnectPasteHint": {
+    "message": "버튼을 누르면 위치가 복사됩니다. 선택 창에서 Ctrl+V로 붙여 넣고 Enter를 누르세요. 폴더는 이어서 「폴더 선택」을 누르세요."
+  },
+  "readerReviewConnectPasteHintMac": {
+    "message": "버튼을 누르면 위치가 복사됩니다. 선택 창에서 Cmd+Shift+G를 누르고 Cmd+V로 붙여 넣으세요."
+  },
+  "readerConnectFolder": {
+    "message": "폴더 연결"
+  },
+  "readerFolderDocumentMissing": {
+    "message": "선택한 폴더에서 이 문서를 찾지 못했습니다. 문서가 들어 있는 폴더나 그 상위 폴더를 고르세요."
   },
   "readerReviewConflict": {
     "message": "원본이 다른 곳에서 변경됐습니다. 문서를 다시 읽고 시도하세요."
@@ -536,9 +529,6 @@
   "reviewTextLabel": {
     "message": "메모 내용"
   },
-  "reviewSaving": {
-    "message": "저장 중…"
-  },
   "reviewSaveFailed": {
     "message": "메모를 저장하지 못했습니다."
   },
@@ -592,6 +582,9 @@
   "readerConnectionTemporaryRefresh": {"message": "파일을 지금 읽을 수 없습니다. 마지막으로 읽은 내용을 유지하며 다음 자동 새로고침에서 다시 시도합니다."},
   "readerReconnectAction": {"message": "다시 연결"},
   "reviewDraftReconnected": {"message": "파일 연결이 바뀌어 메모 저장을 중단했습니다. 작성 내용은 남아 있습니다. 내용을 복사한 뒤 취소하고 새 메모로 작성하세요."},
+  "reviewUnsavedTitle": {"message": "저장하지 않은 메모가 있습니다"},
+  "reviewUnsavedDetails": {"message": "다른 메모를 열기 전에 저장할까요? 저장하지 않으면 작성 중인 내용이 사라집니다."},
+  "reviewDontSave": {"message": "저장 안 함"},
   "readerRemoveFromList": {"message": "목록에서 제거"},
   "readerRemoveFavoriteDetails": {"message": "제거하면 즐겨찾기에서만 제외됩니다. 실제 파일과 열린 탭은 유지됩니다."},
   "readerRemoveRecentDetails": {"message": "제거하면 최근 항목에서만 제외됩니다. 실제 파일과 열린 탭은 유지됩니다."},
@@ -610,6 +603,11 @@
   "pdfDocumentChanged": {"message": "준비 중 문서가 변경됐습니다. 현재 문서에서 PDF 출력을 다시 시작하세요."},
   "releaseNotesLink": {"message": "업데이트 내용"},
   "releaseNotesTitle": {"message": "v$VERSION$ 업데이트", "placeholders": {"version": {"content": "$1"}}},
+  "releaseNotes180Summary": {"message": "파일 주소로 연 문서도 한 번 연결하면 바로 저장되고, macOS에서도 단축키가 동작합니다."},
+  "releaseNotes180Connect": {"message": "탐색기에서 더블클릭하거나 Chrome 탭 줄에 놓아 연 문서도 원본을 한 번 연결하면 다음부터 바로 저장됩니다. 「폴더 연결」을 고르면 그 폴더 안의 문서가 모두 바로 저장되고, 연결 창이 고를 위치를 복사해 두므로 선택 창에 붙여 넣기만 하면 됩니다."},
+  "releaseNotes180Shortcuts": {"message": "Alt(macOS: Option)+글자 단축키가 macOS에서도 동작합니다. 안내 창의 단축키 탭도 운영체제에 맞는 키로 보여 줍니다."},
+  "releaseNotes180Drafts": {"message": "저장하지 않은 메모가 있을 때 다른 메모를 열거나 문서 탭·브라우저 탭을 닫으면 먼저 저장할지 묻습니다."},
+  "releaseNotes180Fixes": {"message": "하이라이트·밑줄이 고른 범위보다 넓게 써지거나 거부되던 문제, 이스케이프한 \\[…\\]가 수식으로 보이던 문제 등을 고쳤습니다."},
   "releaseNotes170Summary": {"message": "선택한 글자에 하이라이트·밑줄을 넣고, 색과 글꼴을 더 다양하게 고를 수 있습니다."},
   "releaseNotes170Marks": {"message": "글자를 선택하면 나타나는 메뉴나 Alt+H·Alt+U로 하이라이트와 밑줄을 넣고 풀 수 있습니다. 원본 파일에 바로 저장됩니다."},
   "releaseNotes170Colors": {"message": "설정에서 하이라이트 색 16가지와 강조색 16가지를 고르거나, 강조색을 밝은 테마·어두운 테마별로 직접 정할 수 있습니다."},
@@ -675,15 +673,15 @@
   "markdownGuideBreakResult": {"message": "강제 줄바꿈"},
   "markdownGuideInsertSyntax": {"message": "++삽입++"},
   "markdownGuideInsertResult": {"message": "삽입"},
-  "markdownGuideMarkSyntax": {"message": "==강조=="},
-  "markdownGuideMarkResult": {"message": "강조"},
+  "markdownGuideMarkSyntax": {"message": "==하이라이트=="},
+  "markdownGuideMarkResult": {"message": "하이라이트"},
+  "markdownGuideMarkTagSyntax": {"message": "<mark>하이라이트</mark>"},
   "markdownGuideEmojiSyntax": {"message": ":sparkles:"},
   "markdownGuideEmojiResult": {"message": "이모지"},
   "markdownGuideHtmlSafety": {"message": "<div onclick=\"...\">"},
   "markdownGuideHtmlSafetyResult": {"message": "허용 태그 표시 · 위험 속성 제거"},
   "markdownGuideCodeSafety": {"message": "`~원문~`"},
   "markdownGuideCodeSafetyResult": {"message": "코드 원문 유지"},
-  "markdownGuideDone": {"message": "닫기"},
   "releaseNotesDone": {"message": "확인"},
   "releaseNotesClose": {"message": "업데이트 내용 닫기"},
   "feedbackLink": {"message": "피드백 보내기"},

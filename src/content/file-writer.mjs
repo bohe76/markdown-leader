@@ -8,6 +8,15 @@ async function read(handle) {
 }
 
 /**
+ * 저장 직전 충돌 검사와 같은 기준(BOM만 제외한 원문 일치)으로 핸들의 파일이 열린 문서와 같은지 확인한다.
+ * @param {FileSystemFileHandle} handle
+ * @param {string} expectedRaw
+ */
+export async function matchesRevision(handle, expectedRaw) {
+  return withoutBOM(await read(handle)) === withoutBOM(expectedRaw)
+}
+
+/**
  * @param {FileSystemFileHandle} handle
  * @param {string} expectedRaw
  * @param {string} nextRaw

@@ -44,21 +44,13 @@ function sanitizeFragment(source) {
 }
 
 function markTaskListHtml(state) {
-  const listItems = []
-  for (const token of state.tokens) {
-    if (token.type === 'list_item_open') {
-      listItems.push({
-        level: token.level,
-        task: token.attrGet('class')?.split(/\s+/).includes('task-list-item') || false,
-      })
-      continue
-    }
-    if (token.type === 'list_item_close') {
-      const index = listItems.findLastIndex(item => item.level === token.level)
-      if (index >= 0) listItems.length = index
-      continue
-    }
-    if (token.type !== 'inline' || !listItems.some(item => item.task)) continue
+  const tokens = state.tokens
+  for (let index = 2; index < tokens.length; index++) {
+    const token = tokens[index]
+    const item = tokens[index - 2]
+    // 작업 목록 플러그인이 체크박스를 넣는 항목의 첫 문단만 신뢰한다. 하위 목록의 원시 HTML 입력은 정화한다.
+    if (token.type !== 'inline' || tokens[index - 1].type !== 'paragraph_open' || item.type !== 'list_item_open'
+      || !item.attrGet('class')?.split(/\s+/).includes('task-list-item')) continue
 
     const children = token.children || []
     const labelOpen = children[0]

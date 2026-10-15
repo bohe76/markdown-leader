@@ -1,7 +1,8 @@
 import { createTranslator } from './i18n.mjs'
 
-export const MARKDOWN_EXTENSION_RE = /\.(?:md|markdown|mdown|mdwn|mkd|mkdn|mkdown|mdx|mdc)$/i
-export const SUPPORTED_EXTENSION_RE = /\.(?:md|markdown|mdown|mdwn|mkd|mkdn|mkdown|mdx|mdc|txt)$/i
+export const MARKDOWN_EXTENSIONS = ['md', 'markdown', 'mdown', 'mdwn', 'mkd', 'mkdn', 'mkdown', 'mdx', 'mdc']
+export const MARKDOWN_EXTENSION_RE = new RegExp(`\\.(?:${MARKDOWN_EXTENSIONS.join('|')})$`, 'i')
+export const SUPPORTED_EXTENSION_RE = new RegExp(`\\.(?:${[...MARKDOWN_EXTENSIONS, 'txt'].join('|')})$`, 'i')
 export const SAFE_LINK_PROTOCOLS = new Set(['http:', 'https:', 'file:', 'mailto:'])
 export const SAFE_IMAGE_PROTOCOLS = new Set(['http:', 'https:', 'file:'])
 
@@ -112,7 +113,14 @@ export function resolveSafeURL(raw, baseURL, kind = 'link') {
   try {
     const url = new URL(value, baseURL)
     const allowed = kind === 'image' ? SAFE_IMAGE_PROTOCOLS : SAFE_LINK_PROTOCOLS
-    return allowed.has(url.protocol) ? url.href : null
+    if (!allowed.has(url.protocol)) return null
+    if (url.protocol === 'file:') {
+      // 다른 호스트의 file URL(UNC)은 Windows에서 원격 SMB 인증을 시도하므로 문서와 같은 호스트만 허용한다.
+      let base = null
+      try { base = new URL(baseURL) } catch { /* 기준 주소가 없으면 기존 판정을 유지한다. */ }
+      if (base?.protocol === 'file:' && url.host !== base.host) return null
+    }
+    return url.href
   } catch {
     return null
   }

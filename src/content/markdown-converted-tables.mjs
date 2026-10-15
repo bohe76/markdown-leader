@@ -20,14 +20,14 @@ function parseAttributes(source) {
   return attributes
 }
 
+// 이어지는 요소는 sticky 패턴으로 현재 위치에서만 찾는다. 닫히지 않은 태그가 많아도 입력을 한 번만 훑는다.
 function parseColumns(source) {
   const columns = []
-  const pattern = /<col\b([^>]*)>/g
+  const pattern = /\s*<col\b([^>]*)>/y
   let position = 0
   let match
 
   while ((match = pattern.exec(source))) {
-    if (source.slice(position, match.index).trim()) return null
     const attributes = parseAttributes(match[1].replace(/\/\s*$/, ''))
     if (!attributes || attributes.size > 1) return null
     const width = attributes.get('width')
@@ -43,21 +43,19 @@ function parseColumns(source) {
 
 function parseRows(source, columnCount) {
   const rows = []
-  const rowPattern = /<tr\b([^>]*)>([\s\S]*?)<\/tr>/g
+  const rowPattern = /\s*<tr\b([^>]*)>([\s\S]*?)<\/tr>/y
   let position = 0
   let rowMatch
 
   while ((rowMatch = rowPattern.exec(source))) {
-    if (source.slice(position, rowMatch.index).trim()) return null
     const attributes = parseAttributes(rowMatch[1])
     if (!attributes || attributes.size > 1 || (attributes.size && attributes.get('color') !== 'gray_bg')) return null
 
     const cells = []
-    const cellPattern = /<td>([\s\S]*?)<\/td>/g
+    const cellPattern = /\s*<td>([\s\S]*?)<\/td>/y
     let cellPosition = 0
     let cellMatch
     while ((cellMatch = cellPattern.exec(rowMatch[2]))) {
-      if (rowMatch[2].slice(cellPosition, cellMatch.index).trim()) return null
       if (/<\/?(?:table|colgroup|col|thead|tbody|tr|td|th)\b/i.test(cellMatch[1])) return null
       cells.push(cellMatch[1])
       cellPosition = cellPattern.lastIndex

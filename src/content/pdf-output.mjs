@@ -55,7 +55,6 @@ function deadline(promise, ms, message, view, signal) {
 
 function breakPositions(element, granularity = 'word') {
   const positions = []
-  const doc = element.ownerDocument
   const atomic = 'svg,img,input,.ml-math,mjx-container,br'
   const segmenter = new Intl.Segmenter(undefined, { granularity })
   function visit(node) {
@@ -127,7 +126,9 @@ export function fitTableWrapping(table) {
     table.style.removeProperty('table-layout')
   } else if (table.querySelector(':scope > colgroup') || table.hasAttribute('width') || table.style.width || table.style.tableLayout) return
   const cells = [...table.rows].flatMap(row => [...row.cells])
-  if (!cells.length || cells.some(cell => cell.colSpan !== 1 || cell.rowSpan !== 1)) return
+  // 열 배열은 첫 행 칸 수로 만들므로 행마다 칸 수가 다른 원시 HTML 표는 그대로 둔다.
+  if (!cells.length || cells.some(cell => cell.colSpan !== 1 || cell.rowSpan !== 1)
+    || [...table.rows].some(row => row.cells.length !== table.rows[0].cells.length)) return
   for (const cell of cells) cell.classList.remove('ml-pdf-compact', 'ml-pdf-nowrap')
   const parent = table.parentElement
   const style = doc.defaultView.getComputedStyle(parent)
@@ -314,6 +315,7 @@ export function fitTableWrapping(table) {
   }
 }
 
+// isCurrent 기본값의 Boolean(true)는 추론 타입을 () => boolean으로 넓힌다. () => true로 줄이면 index.ts 호출이 타입 오류가 난다.
 /** @param {{isCurrent?: () => boolean, errorMessage?: string}} [options] */
 export async function paginateDocument(source, pages, { isCurrent = () => Boolean(true), errorMessage = 'Page layout failed' } = {}) {
   const doc = pages.ownerDocument
@@ -433,7 +435,7 @@ export async function paginateDocument(source, pages, { isCurrent = () => Boolea
       }
     }
     node.remove()
-    if (chain.length) { let empty = target; while (empty !== body && !empty.childNodes.length) { const parent = empty.parentElement; empty.remove(); empty = parent } }
+    removeEmpty(target)
 
     // 표는 머리글을 반복하며 행 경계에서 분할한다.
     if (node.nodeType === 1 && node.tagName === 'TABLE') {

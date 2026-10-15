@@ -11,10 +11,11 @@ import { createReviewUI } from './review-ui.mjs'
 import { createRatingRequest } from './rating-request.mjs'
 import { feedbackFormURL } from './feedback-forms.mjs'
 import { createReleaseNotes } from './release-notes.mjs'
-import { createMarkdownGuide } from './markdown-guide.mjs'
+import { createMarkdownGuide, isMacOS, shortcutLetter } from './markdown-guide.mjs'
 import reviewStyle from './review-ui.css?inline'
 import { parseReview, writeReview, patchTask } from './review-source.mjs'
-import { writeFileRevision } from './file-writer.mjs'
+import { matchesRevision, writeFileRevision } from './file-writer.mjs'
+import { localPaths, matchingFolders } from './folder-links.mjs'
 import { createDocumentLoading } from './document-loading.mjs'
 import { createDocumentTabStrip } from './document-tabs.mjs'
 import documentTabsStyle from './document-tabs.css?inline'
@@ -60,6 +61,8 @@ import {
   getFileName,
   getParentDirectoryURL,
   isSupportedDocument,
+  MARKDOWN_EXTENSIONS,
+  MARKDOWN_EXTENSION_RE,
   normalizeFileURL,
   parseDirectoryListing,
   resolveSafeURL,
@@ -142,7 +145,7 @@ const originalPre = document.querySelector('pre')
 let settings: Settings = { ...defaults }
 let currentFileURL = standaloneReader ? '' : normalizeFileURL(location.href)
 type DocumentSource = ReturnType<typeof createHandleSource>
-interface OpenDocument { id: string; url: string; name: string; source: DocumentSource | null; scroll: ReturnType<typeof captureScroll> | null; pinned?: boolean; favorite?: boolean; libraryId?: string; fileHandle?: any; connectionError?: boolean; connectionMessageKey?: string; refreshSuspended?: boolean; lastRaw?: string; renderedRaw?: string; renderedHtml?: string; recentRemoved?: boolean; bindingRevision?: string; bindingUnavailable?: boolean }
+interface OpenDocument { id: string; url: string; name: string; source: DocumentSource | null; scroll: ReturnType<typeof captureScroll> | null; pinned?: boolean; favorite?: boolean; libraryId?: string; fileHandle?: any; connectionError?: boolean; connectionMessageKey?: string; refreshSuspended?: boolean; lastRaw?: string; renderedRaw?: string; renderedHtml?: string; recentRemoved?: boolean; bindingRevision?: string; bindingUnavailable?: boolean; exactRawPending?: boolean }
 const openDocuments = new Map<string, OpenDocument>()
 const documentsByURL = new Map<string, OpenDocument>()
 const documentsByName = new Map<string, Set<OpenDocument>>()
@@ -413,7 +416,11 @@ window.addEventListener('pagehide', () => { releaseNotes.destroy(); markdownGuid
 const library = createReaderLibrary({ storage: chrome.storage.local, indexedDB, locks: storageLock, onChange: () => updateLibraryPanels() })
 const reviewUI = createReviewUI({ document, window, content, t, onSave: async ({ documentId, expectedRaw, notes }: any) => {
   return saveDocumentRevision(documentId, expectedRaw, writeReview(expectedRaw, notes))
-}, marks: { describe: describeSelectionMarks, apply: applySelectionMark } })
+}, marks: { describe: describeSelectionMarks, apply: applySelectionMark }, dialog: confirmUI })
+// 저장하지 않은 메모 초안은 페이지 메모리에만 있으므로 새로고침·탭 닫기·이동 전에 브라우저 기본 경고를 띄운다.
+window.addEventListener('beforeunload', (event) => {
+  if (reviewUI.hasUnsavedDrafts()) event.preventDefault()
+})
 app.append(reviewUI.element)
 const ratingRequest = createRatingRequest({
   document, window, storage: chrome.storage.local, lock: storageLock, t,
@@ -654,6 +661,8 @@ async function rememberDocument(tab: OpenDocument) {
     if (openDocuments.has(tab.id) && tab.url === url && library.get(entry.id)?.bindingRevision === entry.bindingRevision) {
       tab.libraryId = entry.id
       tab.bindingRevision = entry.bindingRevision
+      // 새 연결 버전을 만드는 동안 목록 갱신이 탭을 연결 오류로 표시했을 수 있으므로 그 경우만 되돌린다.
+      if (tab.bindingUnavailable) connectionState(tab, false)
       tab.bindingUnavailable = false
       tab.favorite = entry.favorite
       documentTabsUI.setFlags(tab.id, { pinned: Boolean(tab.pinned), favorite: Boolean(tab.favorite) })
@@ -688,7 +697,7 @@ async function toggleFavorite(id: string) {
 async function pickOriginal(kind: string) {
   const picker = window as any
   return kind === 'directory' ? picker.showDirectoryPicker({ mode: 'read', id: 'markdown-folder' })
-    : (await picker.showOpenFilePicker({ multiple: false, id: 'markdown-file', types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md', '.markdown', '.mdown', '.mdwn', '.mkd', '.mkdn', '.mkdown', '.mdx', '.mdc'] } }] }))[0]
+    : (await picker.showOpenFilePicker({ multiple: false, id: 'markdown-file', types: [{ description: 'Markdown', accept: { 'text/markdown': MARKDOWN_EXTENSIONS.map(extension => `.${extension}`) } }] }))[0]
 }
 
 async function openLibraryEntry(entry: any, origin: 'recent' | 'favorites') {
@@ -720,32 +729,9 @@ async function openLibraryEntry(entry: any, origin: 'recent' | 'favorites') {
     return
   }
   if (entry.url) {
-    if (entry.kind === 'file') { await readText(entry.url, null); await openFile(entry.url, null) }
-    else {
-      await readText(entry.url, null)
-      closeSearch()
-      const previous = explorerSource
-      explorerSource = null
-      ++explorerGeneration
-      disposeUnusedSource(previous)
-      rootDirectoryURL = entry.url
-      rootName.textContent = entry.name
-      rootName.title = entry.url
-      expandedDirectories.clear()
-      directoryCache.clear()
-      directoryVisibility.clear()
-      directorySnapshotReader = undefined
-      directoryPreparations.clear()
-      fileTree.replaceChildren()
-      delete fileTree.dataset.loaded
-      delete fileTree.dataset.signature
-      delete fileTree.dataset.prefetchComplete
-      activeNavigation = 'files'
-      activePanel = 'files'
-      updateNavigation()
-      await loadDirectory(entry.url, fileTree, true)
-      await library.remember({ ...entry })
-    }
+    // 폴더 항목은 핸들로만 기억하므로 URL이 있는 항목은 파일이다.
+    await readText(entry.url, null)
+    await openFile(entry.url, null)
     return
   }
   throw Object.assign(new Error(t('readerConnectionDetails')), { name: 'NotFoundError' })
@@ -934,7 +920,7 @@ async function recoverConnection(entry: any, origin: 'recent' | 'favorites', exi
     }
     const handle = await pickOriginal(kind)
     if (!handle || !isCurrent()) return
-    if (handle.kind !== kind || (kind === 'file' && !/\.(?:md|markdown|mdown|mdwn|mkd|mkdn|mkdown|mdx|mdc)$/i.test(handle.name))) throw new Error(t('readerMarkdownOnly'))
+    if (handle.kind !== kind || (kind === 'file' && !MARKDOWN_EXTENSION_RE.test(handle.name))) throw new Error(t('readerMarkdownOnly'))
     candidate = createHandleSource(handle)
     const raw = await candidate.readText(candidate.initialURL || candidate.rootURL!)
     if (!isCurrent()) return
@@ -1001,7 +987,7 @@ function reviewError(error: any) {
 
 async function saveDocumentRevision(id: string, expectedRaw: string, nextRaw: string): Promise<string> {
   const tab = openDocuments.get(id)
-  if (!tab || tab.bindingUnavailable || activeDocument !== tab || currentRaw !== expectedRaw || !documentReady) throw new Error(t('readerReviewStale'))
+  if (!tab || tab.bindingUnavailable || tab.exactRawPending || activeDocument !== tab || currentRaw !== expectedRaw || !documentReady) throw new Error(t('readerReviewStale'))
   if (writingDocumentId) throw new Error(t('readerReviewBusy'))
   writingDocumentId = id
   refreshInFlight = false
@@ -1013,12 +999,26 @@ async function saveDocumentRevision(id: string, expectedRaw: string, nextRaw: st
     && activeDocument === tab && openDocuments.has(id) && renderGeneration === generation && currentRaw === expectedRaw
   try {
     let file = tab.fileHandle || (tab.source ? await tab.source.fileHandle(tab.url) : null)
+    if (!file && !tab.source) file = await storedFileHandle(tab)
     if (!file) {
-      if (!await confirmUI.confirm({ heading: t('readerReviewChooseTitle'), message: `${t('readerReviewChooseMessage')}\n${documentPath(tab)}`, action: t('readerSelectFile') })) throw new Error(t('readerReviewStale'))
-      file = await pickOriginal('file')
-      if (!file || file.name !== tab.name) throw new Error(t('readerWrongFile'))
+      // 선택 창의 시작 위치는 경로로 정할 수 없으므로 고를 위치를 복사해 두고 선택 창에 붙여 넣게 안내한다.
+      const paths = localPaths(tab.url)
+      const pasteHint = paths ? `${t(isMacOS(navigator) ? 'readerReviewConnectPasteHintMac' : 'readerReviewConnectPasteHint')}\n\n` : ''
+      // 공용 확인 창의 주 동작('reconnect')은 폴더 연결, 보조 동작('remove')은 파일 선택이다.
+      const action = await confirmUI.choose({ heading: t('readerReviewConnectTitle'),
+        message: `${t('readerReviewConnectMessage')}\n\n${t('readerReviewConnectFolderHint')}\n${t('readerReviewConnectFileHint')}\n${t('readerReviewConnectDropHint')}\n\n${pasteHint}${paths?.file ?? documentPath(tab)}`,
+        action: t('readerConnectFolder'), remove: t('readerSelectFile') })
+      if (action === 'cancel') throw new Error(t('readerReviewStale'))
+      // 선택 창은 버튼 클릭의 사용자 활성화가 남아 있을 때 열어야 하므로 복사 완료를 기다리지 않는다.
+      if (paths) void navigator.clipboard?.writeText(action === 'reconnect' ? paths.folder : paths.file).catch(() => {})
+      if (action === 'reconnect') file = await connectDocumentFolder(tab, expectedRaw)
+      else {
+        file = await pickOriginal('file')
+        if (!file || file.name !== tab.name) throw new Error(t('readerWrongFile'))
+      }
     }
-    const saved = await writeFileRevision(file, expectedRaw, nextRaw, { isCurrent })
+    // 모든 읽기 경로가 BOM을 떼므로 저장 결과도 같은 형태로 보관해야 다음 갱신이 변경으로 보지 않는다. 디스크의 BOM은 writer가 유지한다.
+    const saved = (await writeFileRevision(file, expectedRaw, nextRaw, { isCurrent })).replace(/^﻿/, '')
     tab.fileHandle = file
     if (isCurrent()) {
       currentRaw = saved
@@ -1034,6 +1034,48 @@ async function saveDocumentRevision(id: string, expectedRaw: string, nextRaw: st
     if (bindingSyncRequested) void syncLibraryBindings().catch(reportLibraryError)
     if (activeDocument === tab) restartRefreshTimer()
   }
+}
+
+async function grantWrite(handle: any) {
+  const options = { mode: 'readwrite' }
+  return await handle.queryPermission(options) === 'granted' || await handle.requestPermission(options) === 'granted'
+}
+
+async function resolveFileHandle(directory: any, segments: string[]) {
+  for (const name of segments.slice(0, -1)) directory = await directory.getDirectoryHandle(name)
+  return directory.getFileHandle(segments[segments.length - 1])
+}
+
+// 파일 URL 문서는 탭에 핸들이 없어도 보관함에 기억한 같은 이름의 파일이나 연결한 폴더로 저장할 수 있다.
+// 쓰기 허용을 얻지 못하거나 찾지 못하면 null을 돌려 확인 창으로 넘긴다. 다른 내용의 파일은 writeFileRevision이 막는다.
+async function storedFileHandle(tab: OpenDocument) {
+  try {
+    const entry = (tab.libraryId && library.get(tab.libraryId)) || await library.find({ url: tab.url })
+    const saved = entry ? await library.getHandle(entry.id) : null
+    if (saved?.kind === 'file' && saved.name === tab.name && await grantWrite(saved)) return saved
+  } catch { /* 기억한 핸들을 쓸 수 없으면 폴더 연결을 확인한다. */ }
+  try {
+    const link = await library.findFolderLink(tab.url)
+    if (link && await grantWrite(link.handle)) return await resolveFileHandle(link.handle, link.segments)
+  } catch { /* 연결한 폴더에서 문서를 찾지 못하면 원본을 다시 고르게 한다. */ }
+  return null
+}
+
+// 고른 폴더가 문서 경로의 어느 폴더인지 이름으로 찾고, 그 위치의 파일 내용이 열린 문서와 같을 때만 연결한다.
+// 같은 이름 폴더가 경로에 여러 번 있고 두 위치 모두 내용이 같으면 어느 파일인지 알 수 없으므로 연결하지 않는다.
+async function connectDocumentFolder(tab: OpenDocument, expectedRaw: string) {
+  const root = await (window as any).showDirectoryPicker({ mode: 'readwrite', id: 'markdown-folder' })
+  const matches: { url: string; file: any }[] = []
+  for (const candidate of matchingFolders(tab.url, root.name)) {
+    // 이 위치에 같은 문서가 없으면(찾지 못함·읽기 실패·내용 다름) 다음 같은 이름 폴더를 확인한다.
+    try {
+      const file = await resolveFileHandle(root, candidate.segments)
+      if (await matchesRevision(file, expectedRaw)) matches.push({ url: candidate.url, file })
+    } catch { /* 다음 후보를 확인한다. */ }
+  }
+  if (matches.length !== 1) throw new Error(t('readerFolderDocumentMissing'))
+  try { await library.linkFolder(matches[0].url, root) } catch (error) { reportLibraryError(error) }
+  return matches[0].file
 }
 
 app.querySelector('[data-sidebar-toggle]')!.addEventListener('click', () => {
@@ -1053,7 +1095,7 @@ function markSource(raw: string) {
 }
 
 function describeSelectionMarks(range: Range) {
-  if (!documentReady || !activeDocument || content.classList.contains('ml-paged-document')) return null
+  if (!documentReady || !activeDocument || activeDocument.exactRawPending || content.classList.contains('ml-paged-document')) return null
   const raw = currentRaw
   const source = markSource(raw)
   if (!source) return null
@@ -1240,6 +1282,11 @@ async function closeDocument(id: string) {
   const tab = openDocuments.get(id)
   if (!tab) return
   if (tab.pinned && !await confirmUI.confirm({ heading: t('readerPinnedCloseTitle'), message: tab.name, action: t('readerClose') })) return
+  // 저장하지 않은 메모가 있으면 그 문서를 보여 준 뒤 저장·저장 안 함·취소를 묻는다. 저장은 현재 문서 기준으로만 할 수 있다.
+  if (openDocuments.has(id) && reviewUI.hasUnsavedDraftFor(id)) {
+    if (activeDocument !== tab) await activateDocument(tab)
+    if (!openDocuments.has(id) || activeDocument !== tab || !await reviewUI.confirmClose(id)) return
+  }
   if (!openDocuments.has(id)) return
   const wasActive = activeDocument === tab
   const ordered = wasActive ? [...openDocuments.values()] : []
@@ -1282,7 +1329,7 @@ async function closeDocument(id: string) {
 async function adoptHandle(handle: any) {
   const request = ++sourceSelection
   const openRequest = handle.kind === 'file' ? ++documentOpenRequest : documentOpenRequest
-  if (handle.kind === 'file' && !/\.(?:md|markdown|mdown|mdwn|mkd|mkdn|mkdown|mdx|mdc)$/i.test(handle.name)) throw new Error(t('readerMarkdownOnly'))
+  if (handle.kind === 'file' && !MARKDOWN_EXTENSION_RE.test(handle.name)) throw new Error(t('readerMarkdownOnly'))
   if (handle.kind === 'file') {
     for (const tab of documentsByName.get(handle.name) || []) {
       if (!tab.source) continue
@@ -1362,26 +1409,7 @@ async function chooseSource(folder: boolean) {
   if (choosingSource) return
   choosingSource = true
   try {
-    const picker = window as typeof window & {
-      showDirectoryPicker: (options: object) => Promise<any>
-      showOpenFilePicker: (options: object) => Promise<any[]>
-    }
-    const handle = folder
-      ? await picker.showDirectoryPicker({ mode: 'read', id: 'markdown-folder' })
-      : (await picker.showOpenFilePicker({ multiple: false, id: 'markdown-file', types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md', '.markdown', '.mdown', '.mdwn', '.mkd', '.mkdn', '.mkdown', '.mdx', '.mdc'] } }] }))[0]
-    if (handle) await adoptHandle(handle)
-  } catch (error) {
-    if ((error as Error).name !== 'AbortError') reportError(t('readerChooseFailed'), '', error)
-  } finally {
-    choosingSource = false
-  }
-}
-
-async function chooseLinkedDocument() {
-  if (choosingSource) return
-  choosingSource = true
-  try {
-    const handle = await pickOriginal('file')
+    const handle = await pickOriginal(folder ? 'directory' : 'file')
     if (handle) await adoptHandle(handle)
   } catch (error) {
     if ((error as Error).name !== 'AbortError') reportError(t('readerChooseFailed'), '', error)
@@ -1426,7 +1454,8 @@ app.querySelectorAll<HTMLElement>('[data-tooltip]').forEach((button) => {
 document.addEventListener('keydown', (event) => {
   const target = event.target as HTMLElement | null
   const editing = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || Boolean(target?.isContentEditable)
-  if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.repeat && !editing) {
+  // 확인 창 같은 모달이 열려 있으면 그 아래 본문을 바꾸는 단축키를 실행하지 않는다.
+  if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.repeat && !editing && !document.querySelector('dialog:modal')) {
     const actions: Record<string, () => void> = {
       o: () => { void chooseSource(false) },
       k: () => { void chooseSource(true) },
@@ -1437,7 +1466,8 @@ document.addEventListener('keydown', (event) => {
       p: () => pdfOpen.click(),
       g: () => { markdownGuide.show() },
     }
-    const action = actions[event.key.toLowerCase()]
+    const letter = shortcutLetter(event)
+    const action = letter ? actions[letter] : undefined
     if (action) {
       event.preventDefault()
       action()
@@ -1469,12 +1499,11 @@ app.addEventListener('drop', (event) => {
   if (choosingSource) return
   const item = [...event.dataTransfer.items].find((item) => item.kind === 'file') as (DataTransferItem & { getAsFileSystemHandle?: () => Promise<any> }) | undefined
   if (!item) return
-  const file = item.getAsFile()
   const pending = item.getAsFileSystemHandle?.()
   choosingSource = true
   void (async () => {
     try {
-      const handle = pending ? await pending : file && { kind: 'file', name: file.name, getFile: async () => file }
+      const handle = pending ? await pending : null
       if (handle) await adoptHandle(handle)
     } catch (error) { reportError(t('readerChooseFailed'), '', error) }
     finally { choosingSource = false }
@@ -1732,7 +1761,7 @@ function renderMarkdown(raw: string, preserveScroll = false, preparedHtml?: stri
     activeDocument.renderedHtml = renderedHtml
   }
   content.querySelectorAll<HTMLTableElement>('table').forEach(fitTableWrapping)
-  content.querySelectorAll<HTMLInputElement>('input[data-task-line]').forEach(input => { input.disabled = false })
+  content.querySelectorAll<HTMLInputElement>('input[data-task-line]').forEach(input => { input.disabled = !!activeDocument?.exactRawPending })
   hydrateLocalImages()
   const counts = new Map<string, number>()
   content.querySelectorAll<HTMLElement>('h1,h2,h3,h4,h5,h6').forEach((heading) => {
@@ -1750,7 +1779,7 @@ function renderMarkdown(raw: string, preserveScroll = false, preparedHtml?: stri
     pre.appendChild(button)
   })
   renderToc()
-  reviewUI.setDocument({ id: activeDocument?.id || '', raw, ready: true })
+  reviewUI.setDocument({ id: activeDocument?.id || '', raw, ready: !activeDocument?.exactRawPending })
   highlightDocument(false)
   document.title = `${getFileName(currentFileURL)} · Markdown Leader`
   if (snapshot) restoreScroll(snapshot)
@@ -1778,7 +1807,7 @@ content.addEventListener('click', (event) => {
     }
     if (link.href.startsWith('file:') && isSupportedDocument(link.href)) {
       event.preventDefault()
-      if (handleSource && (!handleSource.rootURL || !link.href.startsWith(handleSource.rootURL))) void chooseLinkedDocument()
+      if (handleSource && (!handleSource.rootURL || !link.href.startsWith(handleSource.rootURL))) void chooseSource(false)
       else void openFile(link.href, handleSource)
     }
   }
@@ -1854,7 +1883,7 @@ function paginateReadingDocument(isCurrent: () => boolean): Promise<void> {
     if (!current()) return
     content.querySelectorAll<HTMLDetailsElement>('details').forEach((details, index) => { details.dataset.readingDetail = String(index) })
     const source = content.cloneNode(true) as HTMLElement
-    source.querySelectorAll('.ml-copy,.ml-review-badge,.ml-diagram-stage').forEach(node => node.remove())
+    source.querySelectorAll('.ml-copy,.ml-diagram-stage').forEach(node => node.remove())
     source.querySelectorAll('mark.ml-match').forEach(node => node.replaceWith(...node.childNodes))
     const pages = document.createElement('div')
     pages.className = 'ml-pdf-measure'
@@ -1880,7 +1909,7 @@ function paginateReadingDocument(isCurrent: () => boolean): Promise<void> {
       content.dataset.pdfPaginated = 'true'
       readingLayoutKey = currentReadingLayoutKey()
       renderToc()
-      reviewUI.setDocument({ id: activeDocument?.id || '', raw: currentRaw, ready: true })
+      reviewUI.setDocument({ id: activeDocument?.id || '', raw: currentRaw, ready: !activeDocument?.exactRawPending })
       highlightDocument(false)
       restoreScroll(snapshot)
     } finally {
@@ -2409,7 +2438,7 @@ async function openFile(url: string, source: DocumentSource | null = explorerSou
               tab.source = source
               tab.url = normalized
               documentsByURL.set(normalized, tab)
-              documentTabsUI.setDescription(tab.id, `${source.name} / ${decodeURIComponent(new URL(normalized).pathname.split('/').slice(3).join('/'))}`)
+              documentTabsUI.setDescription(tab.id, documentPath(tab))
               try { await activateDocument(tab, requestedHash, undefined, true) }
               finally { releaseSource(previous) }
             } else await activateDocument(tab, requestedHash)
@@ -2424,7 +2453,8 @@ async function openFile(url: string, source: DocumentSource | null = explorerSou
 }
 
 async function refreshNow() {
-  if (writingDocumentId || !activeDocument || activeDocument.refreshSuspended || !documentReady || !pageActive || extensionInvalidated || refreshInFlight || document.hidden || !settings.refreshEnabled || !fileTree.isConnected) return
+  // 확인 창 같은 모달이 열린 동안 본문을 다시 그리면 창을 연 뒤의 선택과 화면이 어긋나므로 다음 주기로 미룬다.
+  if (writingDocumentId || !activeDocument || activeDocument.refreshSuspended || !documentReady || !pageActive || extensionInvalidated || refreshInFlight || document.hidden || !settings.refreshEnabled || !fileTree.isConnected || document.querySelector('dialog:modal')) return
   refreshInFlight = true
   const request = ++refreshRequest
   const isCurrent = captureReadTarget(true)
@@ -2717,14 +2747,50 @@ function mountViewer() {
   scheduleEnhancements()
 }
 
+// 파일 URL 문서의 첫 화면은 Chrome이 만든 <pre>에서 읽어 CRLF가 LF로 바뀌어 있다. 저장 비교는 실제 바이트를 써야 하므로 첫 표시 뒤 한 번 다시 읽는다.
+// 다시 읽기 전에 저장하면 LF 원문과 CRLF 파일을 비교해 충돌로 실패하므로, 그동안 체크박스·메모·표시 저장을 막고 끝나면(실패해도) 푼다.
+async function reconcileInitialRaw() {
+  const tab = activeDocument
+  const url = currentFileURL
+  const before = currentRaw
+  const isCurrent = captureReadTarget()
+  if (!tab || !url) return
+  try {
+    const raw = await readText(url)
+    if (!isCurrent() || activeDocument !== tab || currentFileURL !== url || writingDocumentId || currentRaw !== before) return
+    tab.lastRaw = raw
+    if (raw === currentRaw) return
+    const contentChanged = raw.replace(/\r\n?/g, '\n') !== currentRaw
+    currentRaw = raw
+    if (contentChanged) {
+      renderMarkdown(raw, true)
+      setStatus(t('readerRefreshedAt', new Date().toLocaleTimeString(readerLanguage)))
+    } else {
+      // 줄끝만 다르면 화면은 그대로 두되, 메모 저장과 렌더 캐시가 실제 바이트를 기준으로 삼게 한다.
+      if (tab.renderedRaw === before) tab.renderedRaw = raw
+      reviewUI.setDocument({ id: tab.id, raw, ready: true })
+    }
+  } catch { /* 읽기 실패는 자동 갱신이나 저장이 같은 경로로 다시 알린다. */ }
+  finally {
+    tab.exactRawPending = false
+    if (activeDocument === tab) {
+      content.querySelectorAll<HTMLInputElement>('input[data-task-line]').forEach(input => { input.disabled = false })
+      reviewUI.setDocument({ id: tab.id, raw: currentRaw, ready: true })
+    }
+  }
+}
+
 function scheduleInitialBackgroundWork() {
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       void (async () => {
+        // 원문 재확인은 폴더 트리와 함께 진행하고, 자동 갱신 타이머는 둘 다 끝난 뒤 시작한다.
+        const reconciled = originalPre !== null ? reconcileInitialRaw() : undefined
         let treeSucceeded = true
         if (rootDirectoryURL) treeSucceeded = await loadDirectory(rootDirectoryURL, fileTree, true)
         else fileTree.innerHTML = `<li class="ml-empty">${escapeHtml(t('readerFolderLocalFilesOnly'))}</li>`
         if (treeSucceeded) setStatus('')
+        await reconciled
         initialBackgroundWorkComplete = true
         restartRefreshTimer()
       })()
@@ -2771,6 +2837,7 @@ async function start() {
     return
   }
   activeDocument = registerDocument(currentFileURL, null)
+  if (originalPre !== null) activeDocument.exactRawPending = true
   documentTabsUI.select(activeDocument.id)
   content.setAttribute('aria-labelledby', `ml-document-tab-${activeDocument.id}`)
   const generation = ++renderGeneration

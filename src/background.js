@@ -11,8 +11,13 @@ const defaults = {
 }
 
 chrome.runtime.onInstalled.addListener(details => {
-  chrome.storage.local.get({ ...defaults, ratingInstalledAt: 0 }, (values) => {
-    if (!values.ratingInstalledAt) values.ratingInstalledAt = Date.now()
+  chrome.storage.local.get(null, (stored) => {
+    // 다른 화면이 그 사이 바꾼 설정을 덮어쓰지 않도록 비어 있는 값만 채운다.
+    const values = {}
+    for (const [key, value] of Object.entries(defaults)) {
+      if (!Object.hasOwn(stored, key)) values[key] = value
+    }
+    if (!stored.ratingInstalledAt) values.ratingInstalledAt = Date.now()
     if (details.reason === 'update') {
       const version = chrome.runtime.getManifest().version
       if (details.previousVersion && details.previousVersion !== version) {
@@ -24,8 +29,15 @@ chrome.runtime.onInstalled.addListener(details => {
 })
 
 function isReaderSender(sender) {
-  const readerURL = `chrome-extension://${chrome.runtime.id}/reader.html`
-  return sender?.id === chrome.runtime.id && (sender.tab?.url?.startsWith('file:') || sender.url === readerURL)
+  if (sender?.id !== chrome.runtime.id) return false
+  if (sender.tab?.url?.startsWith('file:')) return true
+  // 독립 리더는 각주 이동 등으로 주소 조각이 붙어도 같은 페이지로 본다.
+  try {
+    const url = new URL(sender.url)
+    return url.protocol === 'chrome-extension:' && url.host === chrome.runtime.id && url.pathname === '/reader.html'
+  } catch {
+    return false
+  }
 }
 
 const libraryLockQueue = []

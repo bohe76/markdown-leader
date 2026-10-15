@@ -5,6 +5,11 @@ const bridgeLoads = new WeakMap()
 const generations = new WeakMap()
 
 export function markdownMath(md) {
+  // MathJax는 \eqref 같은 본문 참조를 위해 문서 글자 전체를 다시 훑는다. 이스케이프로 글자가 된 \( \) \[ \]가
+  // 수식 구분자로 오인되지 않도록 백슬래시를 MathJax 기본 제외 클래스로 감싼다. 보이는 글자는 그대로다.
+  const renderText = md.renderer.rules.text || ((tokens, index) => md.utils.escapeHtml(tokens[index].content))
+  md.renderer.rules.text = (tokens, index, options, env, self) =>
+    renderText(tokens, index, options, env, self).replace(/\\(?=[()[\]])/g, '<span class="mathjax_ignore">\\</span>')
   md.use(tex, {
     delimiters: 'all',
     allowInlineWithSpace: false,
@@ -16,6 +21,23 @@ export function markdownMath(md) {
       return `<${tag} class="${className}" data-math-state="pending" data-display-mode="${displayMode ? 'block' : 'inline'}" data-math-source="${md.utils.escapeHtml(source)}"><span class="ml-math-source">${open}${md.utils.escapeHtml(source)}${close}</span></${tag}>`
     },
   })
+  // 플러그인 블록 규칙은 `\[`로 시작해 `\]`로 끝나는 줄을 통째로 수식으로 잡는다. `- \[경제\] 제목 \[태그\]`처럼
+  // 내용 안에 닫는 `\]`가 먼저 나오면 수식이 아니라 이스케이프한 괄호이므로 거부하고 일반 문단으로 넘긴다.
+  // 조용한 검사(문단 끊기 판정)도 같은 기준을 쓰도록 실제로 해석해 본 뒤 되돌린다.
+  const bracketRule = md.block.ruler.__rules__.find(rule => rule.name === 'math_block_bracket')
+  if (!bracketRule) throw new Error('math_block_bracket rule is missing')
+  const bracketBlock = bracketRule.fn
+  md.block.ruler.at('math_block_bracket', (state, startLine, endLine, silent) => {
+    const tokenCount = state.tokens.length
+    const line = state.line
+    if (!bracketBlock(state, startLine, endLine, false)) return false
+    const valid = !/(?:^|[^\\])(?:\\\\)*\\\]/.test(state.tokens[tokenCount].content)
+    if (silent || !valid) {
+      state.tokens.length = tokenCount
+      state.line = line
+    }
+    return valid
+  }, { alt: bracketRule.alt })
 }
 
 function loadScript(doc, path) {

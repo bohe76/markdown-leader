@@ -9,6 +9,8 @@ const githubRules = [
 const extensionRules = [
   ['markdownGuideInsertSyntax', 'markdownGuideInsertResult', 'insert'],
   ['markdownGuideMarkSyntax', 'markdownGuideMarkResult', 'mark'],
+  // `==`가 성립하지 않는 자리에 하이라이트를 넣으면 원본에 <mark>로 기록되므로 같은 하이라이트임을 알린다.
+  ['markdownGuideMarkTagSyntax', 'markdownGuideMarkResult', 'mark-tag'],
   ['markdownGuideEmojiSyntax', 'markdownGuideEmojiResult', 'emoji'],
 ]
 
@@ -23,8 +25,8 @@ function createRenderedPreview(document, t, syntaxKey, kind) {
     return element
   }
   if (kind === 'strike') preview.append(wrapped('s', source.replace(/^~+|~+$/g, '')))
-  else if (kind === 'subscript' || kind === 'superscript' || kind === 'underline') {
-    const tag = kind === 'subscript' ? 'sub' : kind === 'superscript' ? 'sup' : 'ins'
+  else if (kind === 'subscript' || kind === 'superscript' || kind === 'underline' || kind === 'mark-tag') {
+    const tag = kind === 'subscript' ? 'sub' : kind === 'superscript' ? 'sup' : kind === 'mark-tag' ? 'mark' : 'ins'
     const match = pair(tag)
     if (match) preview.append(document.createTextNode(match[1]), wrapped(tag, match[2]), document.createTextNode(match[3]))
     else preview.textContent = source
@@ -81,6 +83,21 @@ function createGuideLegend(document, t) {
   return legend
 }
 
+// macOS의 Option+글자는 event.key가 특수 문자(˙, ø)나 Dead로 바뀌므로 글자가 아니면 물리 키 위치로 판정한다.
+export function shortcutLetter(event) {
+  if (/^[a-z]$/i.test(event.key)) return event.key.toLowerCase()
+  return /^Key([A-Z])$/.exec(event.code || '')?.[1].toLowerCase() ?? null
+}
+
+export function isMacOS(nav) {
+  return /^mac/i.test(nav?.userAgentData?.platform || nav?.platform || '')
+}
+
+// macOS 키보드에서는 Alt 키를 Option으로 표기한다.
+export function shortcutModifier(nav) {
+  return isMacOS(nav) ? '⌥ Option' : 'Alt'
+}
+
 export function createMarkdownGuide({ document, t, button }) {
   const element = document.createElement('dialog')
   element.className = 'ml-confirm-dialog ml-markdown-guide-dialog'
@@ -115,9 +132,10 @@ export function createMarkdownGuide({ document, t, button }) {
   shortcutsPanel.hidden = true
   const shortcutList = document.createElement('ul')
   shortcutList.className = 'ml-markdown-guide-shortcuts'
+  const modifier = shortcutModifier(document.defaultView?.navigator)
   for (const [key, label] of [['O', 'shortcutOpenFile'], ['K', 'shortcutOpenFolder'], ['S', 'shortcutSearch'], ['M', 'shortcutNotes'], ['H', 'shortcutHighlight'], ['U', 'shortcutUnderline'], ['P', 'shortcutPdf'], ['G', 'shortcutGuide'], ['R', 'shortcutRefresh'], ['T', 'shortcutTheme']]) {
     const item = document.createElement('li')
-    item.innerHTML = `<kbd>Alt</kbd><kbd>${key}</kbd>`
+    item.innerHTML = `<kbd>${modifier}</kbd><kbd>${key}</kbd>`
     item.append(document.createTextNode(t(label)))
     shortcutList.append(item)
   }

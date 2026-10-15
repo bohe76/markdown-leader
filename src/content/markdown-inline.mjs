@@ -27,7 +27,7 @@ function finishStrikethrough(state) {
   const groups = [state.delimiters, ...state.tokens_meta.map(meta => meta?.delimiters).filter(Boolean)]
   for (const delimiters of groups) {
     for (const delimiter of delimiters) {
-      if (![0x7e, 0x7e7e].includes(delimiter.marker) || delimiter.end === -1) continue
+      if (delimiter.marker !== 0x7e7e || delimiter.end === -1) continue
       const open = state.tokens[delimiter.token]
       const close = state.tokens[delimiters[delimiter.end].token]
       for (const [token, nesting] of [[open, 1], [close, -1]]) {
@@ -43,7 +43,7 @@ function finishStrikethrough(state) {
 
 function safeInlineTag(state, silent) {
   if (state.src.charCodeAt(state.pos) !== 0x3c) return false
-  const match = /^(<br(?: ?\/)?>|<(\/?)(sub|sup|ins)>|<a id=(?:"([A-Za-z][A-Za-z0-9_-]*)"|“([A-Za-z][A-Za-z0-9_-]*)”)><\/a>)/i.exec(state.src.slice(state.pos))
+  const match = /^(<br(?: ?\/)?>|<(\/?)(sub|sup|ins|mark)>|<a id=(?:"([A-Za-z][A-Za-z0-9_-]*)"|“([A-Za-z][A-Za-z0-9_-]*)”)><\/a>)/i.exec(state.src.slice(state.pos))
   if (!match) return false
   if (!silent) {
     const anchorId = match[4] || match[5]

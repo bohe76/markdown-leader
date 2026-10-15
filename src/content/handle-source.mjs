@@ -84,7 +84,8 @@ export function createHandleSource(handle) {
     for await (const [childName, child] of current.entries()) {
       assertCurrent()
       if (entries.length >= 2000) throw new Error('ML_HANDLE_DIRECTORY_LIMIT')
-      safeName(childName)
+      // 경로 구분자가 든 항목 하나 때문에 폴더 전체를 실패시키지 않고 그 항목만 건너뛴다.
+      try { safeName(childName) } catch { continue }
       entries.push({ name: childName, child, modified: 0 })
     }
     assertCurrent()
