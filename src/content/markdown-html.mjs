@@ -10,6 +10,10 @@ const allowedTags = [
 ]
 const allowedTagSet = new Set(allowedTags)
 const voidTags = new Set(['br', 'col', 'hr', 'img'])
+const blockTags = new Set([
+  'blockquote', 'caption', 'col', 'colgroup', 'dd', 'div', 'dl', 'dt', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'hr', 'li', 'ol', 'p', 'pre', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'ul',
+])
 const allowedAttributes = ['alt', 'colspan', 'href', 'rowspan', 'scope', 'src', 'title']
 const tagAttributes = {
   a: new Set(['href', 'title']),
@@ -180,10 +184,23 @@ export function markdownHtml(md, options = {}) {
   const sanitizeInline = options.sanitizeInline || sanitizeRawInlineTag
 
   md.core.ruler.push('markdown_leader_mark_task_list_html', markTaskListHtml)
-  md.renderer.rules.html_block = (tokens, index) => `${sanitizeBlock(tokens[index].content, getBaseURL(), getLocalImages())}\n`
+  md.renderer.rules.html_block = (tokens, index) => {
+    const source = tokens[index].content
+    const html = sanitizeBlock(source, getBaseURL(), getLocalImages())
+    return wrapsAsText(source, html) ? `<p class="ml-html-text">${html.replace(/^\s*\n|\s+$/g, '').replace(/<br>\n/g, '<br>')}</p>\n` : `${html}\n`
+  }
   md.renderer.rules.html_inline = (tokens, index) => {
     const token = tokens[index]
     if (token.meta?.markdownLeaderInternal === 'task-list') return token.content
     return sanitizeInline(token.content, getBaseURL(), getLocalImages())
   }
+}
+
+// 지워지는 태그(`<done>` 같은 구획 태그)로 시작해 인라인 태그만 남은 블록은 이웃 블록과 한 줄로 이어지지 않게
+// 문단으로 감싸고 원문 줄바꿈을 살린다. 허용 태그로 시작한 블록(README 배지 줄, `<div>` 빈 줄 `</div>`)과
+// 블록 태그가 남은 블록은 작성한 HTML 구조를 따르도록 감싸지 않는다.
+function wrapsAsText(source, html) {
+  const opening = /^\s*<\/?([a-z][a-z0-9-]*)/i.exec(source)?.[1].toLowerCase()
+  if (!opening || allowedTagSet.has(opening) || !html.trim()) return false
+  return [...html.matchAll(/<\/?([a-z][a-z0-9]*)/gi)].every(([, tag]) => !blockTags.has(tag.toLowerCase()))
 }

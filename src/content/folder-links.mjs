@@ -27,13 +27,13 @@ export function folderLinkCandidates(fileURL) {
 
 /**
  * 선택 창에 붙여 넣을 운영체제 경로(파일과 그 파일을 담은 폴더)를 돌려준다. 드라이브 문자로 시작하면 Windows 표기를 쓴다.
- * 연결 후보를 만들 수 없는 주소(UNC 등)는 null이다.
+ * 연결 후보를 만들 수 없는 주소(UNC 등)와 리더가 고른 파일·폴더에 붙인 가상 주소는 null이다.
  * @param {string} fileURL
  * @returns {{ file: string, folder: string } | null}
  */
 export function localPaths(fileURL) {
   const path = fileSegments(fileURL)
-  if (!path) return null
+  if (!path || path.names[0] === '__markdown_leader__') return null
   const folder = path.names.slice(0, -1)
   if (/^[A-Za-z]:$/.test(path.names[0])) {
     return { file: path.names.join('\\'), folder: folder.length === 1 ? `${folder[0]}\\` : folder.join('\\') }

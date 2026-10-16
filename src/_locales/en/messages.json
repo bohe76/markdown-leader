@@ -463,6 +463,24 @@
   "readerReviewConnectPasteHintMac": {
     "message": "The buttons copy the location. In the picker, press Cmd+Shift+G, then Cmd+V to paste it."
   },
+  "readerConnectionPasteHint": {
+    "message": "Reconnect copies the location. In the picker, press Ctrl+V to paste it and press Enter."
+  },
+  "readerLinkTitle": {
+    "message": "Choose the linked document"
+  },
+  "readerLinkDetails": {
+    "message": "The linked document is outside the file or folder you opened, so choose it to open it."
+  },
+  "readerLinkPasteHint": {
+    "message": "Choose file copies the location. In the picker, press Ctrl+V to paste it and press Enter."
+  },
+  "readerLinkPasteHintMac": {
+    "message": "Choose file copies the location. In the picker, press Cmd+Shift+G, then Cmd+V to paste it."
+  },
+  "readerConnectionPasteHintMac": {
+    "message": "Reconnect copies the location. In the picker, press Cmd+Shift+G, then Cmd+V to paste it."
+  },
   "readerConnectFolder": {
     "message": "Connect folder"
   },
@@ -603,6 +621,9 @@
   "pdfDocumentChanged": {"message": "The document changed during preparation. Start PDF output again for the current document."},
   "releaseNotesLink": {"message": "What’s new"},
   "releaseNotesTitle": {"message": "Updated to v$VERSION$", "placeholders": {"version": {"content": "$1"}}},
+  "releaseNotes181Summary": {"message": "Review the main 1.8.0 changes and the 1.8.1 connection and display improvements."},
+  "releaseNotes181Paste": {"message": "When you choose Reconnect for a document opened from a file address, or a file:/// link in a document points outside what you opened, the location is copied before the picker opens. Paste it into the picker and press Enter."},
+  "releaseNotes181Html": {"message": "Fixes custom tag blocks such as <done> and <decisions> that ran together as one paragraph even when separated by blank lines. Their line breaks are now kept."},
   "releaseNotes180Summary": {"message": "Documents opened from a file address save directly after one connection, and shortcuts work on macOS."},
   "releaseNotes180Connect": {"message": "Documents you double-click in your file manager or drop on Chrome's tab strip save directly after you connect the original once. Choose Connect folder to save every document in that folder; the connect dialog copies the location so you only paste it into the picker."},
   "releaseNotes180Shortcuts": {"message": "Alt (macOS: Option) + letter shortcuts now work on macOS, and the guide's Shortcuts tab shows the right key for your system."},

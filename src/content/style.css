@@ -171,6 +171,7 @@ input[type="checkbox"]:focus-visible { outline: 2px solid var(--ml-focus-ring); 
 .ml-document h3 { margin-top: 1.5em; font-size: 1.3em; }
 .ml-document a { color: var(--ml-accent-strong); }
 .ml-document mark:not(.ml-match) { color: var(--ml-mark-text); background: var(--ml-mark-bg); }
+.ml-document .ml-html-text { white-space: pre-wrap; }
 .ml-document .markdown-alert { margin: 1em 0; padding: 12px 16px; border-left: 4px solid var(--ml-accent-strong); background: var(--ml-bg); }
 .ml-document .markdown-alert-title { margin: 0 0 8px; color: var(--ml-accent-strong); font-size: .94em; font-weight: 600; }
 .ml-document .markdown-alert > :last-child { margin-bottom: 0; }

@@ -891,11 +891,17 @@ async function recoverConnection(entry: any, origin: 'recent' | 'favorites', exi
   const request = documentOpenRequest
   const isCurrent = () => pageActive && activeDocument === owner && documentOpenRequest === request && (!tab || openDocuments.get(tab.id) === tab)
   let candidate: DocumentSource | null = null
+  const kind = entry?.kind || 'file'
+  // 파일 URL로 연 파일만 운영체제 경로를 안다. 저장 연결 창처럼 경로를 보여 주고 「다시 연결」에서 복사해 선택 창에 붙여 넣게 한다.
+  const paths = kind === 'file' ? localPaths(entry?.url || (tab && !tab.source ? tab.url : '')) : null
+  const pasteHint = paths ? `\n\n${t(isMacOS(navigator) ? 'readerConnectionPasteHintMac' : 'readerConnectionPasteHint')}` : ''
   try {
     const action = await confirmUI.choose({ heading: t('readerConnectionTitle'),
-      message: `${t(tab?.connectionMessageKey || 'readerConnectionDetails')}\n${entry?.path || entry?.url || (tab ? documentPath(tab) : entry.name)}\n\n${t(origin === 'favorites' ? 'readerRemoveFavoriteDetails' : 'readerRemoveRecentDetails')}`,
+      message: `${t(tab?.connectionMessageKey || 'readerConnectionDetails')}\n${paths?.file ?? (entry?.path || entry?.url || (tab ? documentPath(tab) : entry.name))}${pasteHint}\n\n${t(origin === 'favorites' ? 'readerRemoveFavoriteDetails' : 'readerRemoveRecentDetails')}`,
       action: t('readerReconnectAction'), remove: t('readerRemoveFromList') })
     if (!isCurrent() || action === 'cancel') return
+    // 선택 창은 버튼 클릭의 사용자 활성화가 남아 있을 때 열어야 하므로 복사 완료를 기다리지 않는다.
+    if (action === 'reconnect' && paths) void navigator.clipboard?.writeText(paths.file).catch(() => {})
     if (action === 'remove') {
       if (entry) {
         if (origin === 'favorites') await library.setFavorite(entry.id, false)
@@ -906,7 +912,6 @@ async function recoverConnection(entry: any, origin: 'recent' | 'favorites', exi
       }
       return
     }
-    const kind = entry?.kind || 'file'
     const folderTabs: { tab: OpenDocument; relativePath: string }[] = []
     if (kind === 'directory' && entry) {
       const previousRoot = await library.getHandle(entry.id)
@@ -1405,10 +1410,19 @@ async function adoptHandle(handle: any) {
   }
 }
 
-async function chooseSource(folder: boolean) {
+async function chooseSource(folder: boolean, linkURL = '') {
   if (choosingSource) return
   choosingSource = true
   try {
+    // 범위 밖 링크가 실제 파일 주소면 경로를 보여 주고, 「파일 선택」에서 복사해 선택 창에 붙여 넣게 한다.
+    // 복사 알림은 선택 창 뒤에 가려지므로 선택 창을 열기 전 확인 창에서 안내한다.
+    const paths = localPaths(linkURL)
+    if (paths) {
+      const hint = t(isMacOS(navigator) ? 'readerLinkPasteHintMac' : 'readerLinkPasteHint')
+      if (!await confirmUI.confirm({ heading: t('readerLinkTitle'), message: `${t('readerLinkDetails')}\n\n${hint}\n\n${paths.file}`, action: t('readerSelectFile') })) return
+      // 선택 창은 버튼 클릭의 사용자 활성화가 남아 있을 때 열어야 하므로 복사 완료를 기다리지 않는다.
+      void navigator.clipboard?.writeText(paths.file).catch(() => {})
+    }
     const handle = await pickOriginal(folder ? 'directory' : 'file')
     if (handle) await adoptHandle(handle)
   } catch (error) {
@@ -1807,7 +1821,7 @@ content.addEventListener('click', (event) => {
     }
     if (link.href.startsWith('file:') && isSupportedDocument(link.href)) {
       event.preventDefault()
-      if (handleSource && (!handleSource.rootURL || !link.href.startsWith(handleSource.rootURL))) void chooseSource(false)
+      if (handleSource && (!handleSource.rootURL || !link.href.startsWith(handleSource.rootURL))) void chooseSource(false, link.href)
       else void openFile(link.href, handleSource)
     }
   }
